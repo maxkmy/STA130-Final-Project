@@ -1,6 +1,6 @@
 ---
 title: "Your Project Title (be descriptive and creative!)"
-author: "Group 35: Max Ming Yi Koh (1007972785) and Kevin Le (TODO: add student $)"
+author: "Group 35: Max Ming Yi Koh (1007972785) and Kevin Le (TODO: add student #)"
 date: March 31, 2022
 output: 
   beamer_presentation:
@@ -18,131 +18,110 @@ urlcolor: blue
 # echo=FALSE will stop the code chunk from appearing in the knit document
 # warning=FALSE and message=FALSE will stop R messages from appearing in the knit document
 library(tidyverse)
+library(dplyr)
 
 # here is the data for this project
 expedia_data <- read_csv("ExpediaSearchData.csv")
+glimpse(expedia_data)
 
 # see the Project Overview page for more information: 
 # https://q.utoronto.ca/courses/235890/pages/project-overview
 ```
 
+## Overall Introductions
 
-## A heading that starts on a new page
+## Data Summary
 
-This document shows a few basics on making slides with R markdown.
+## Research Question 1
+Does urgency affect how much consumers are willing to pay? 
 
-To produce the slides, Knit to PDF (Beamer).
+--- 
+# TODO: Add visualization 
+```{r}
+expedia_data_q1 <- expedia_data %>% 
+  select(is_trans1, is_trans2, is_trans3, price_bucket1, price_bucket2, price_bucket3, 
+         checkin_date, search_timestamp, destination_id) %>% 
+  filter(is_trans1 + is_trans2 + is_trans3 == 1 & 
+           !is.na(checkin_date) & !is.na(search_timestamp) & !is.na(destination_id)) %>%
+  mutate(
+    price_bucket1 = ifelse(is.na(is_trans1) | is_trans1 == 0, 0, price_bucket1),
+    price_bucket2 = ifelse(is.na(is_trans2) | is_trans2 == 0, 0, price_bucket2),
+    price_bucket3 = ifelse(is.na(is_trans3) | is_trans3 == 0, 0, price_bucket2),
+    price_bucket = (price_bucket1 + price_bucket2 + price_bucket3) / (is_trans1 + is_trans2 + is_trans3),
+    search_timestamp = as.Date(as.character(search_timestamp)))
 
-The examples shown were made with the `cars` dataset, which is NOT your project dataset.
-
----
-
-Three dashes starts a new page when it is not started by a new header. If you want to put a gap between parts of a slide `\vspace{0.3cm}` will do it. You can change the number inside the curly brackets to get a smaller or larger gap.
-
-\vspace{0.8cm}
-
-### This is a heading that doesn't start a new page but makes a nice emphasis box
-
-You can make text **bold** or in *italics*.
-
-To make bullet points, start the points after a blank line:
- 
-- point one\
-- another point (you need to do a double space or a backslash to start a new line)
-
-## Markdown has nice formatting options for you
-
-1. Check out the cheat sheet [https://github.com/rstudio/cheatsheets/raw/master/rmarkdown-2.0.pdf](https://github.com/rstudio/cheatsheets/raw/master/rmarkdown-2.0.pdf)
-    i) Oh look! A sub-item in the list (note two 'tabs' before this line)
-2. You can get help making tables here: [https://www.tablesgenerator.com/markdown_tables#](https://www.tablesgenerator.com/markdown_tables#)
-
-| A column header | Another column header                |
-|-----------------|--------------------------------------|
-| First row       | First row, but now the second column |
-
----
-
-## You can also use LaTeX commands 
-
-Examples include:
-
-- changing text colour, e.g.,  Roses are \textcolor{red}{red}, violets are \textcolor{blue}{blue}\
-- writing equations and mathematical symbols, both inline and not inline e.g., the equation of a line and subscripts like H_0 to $H_0$\
-
----
-
-If you include an image _not_ created in R, you MUST make sure that you provide the file with your upload. You will lose reproducibility marks if we can't recreate your report and this includes external images. The scale command changes the size.
-
-\begin{center}
-\includegraphics[width=7.5cm, height=4.5cm]{images/example-image.jpeg}
-\end{center}
-
-Photo by [Adi Goldstein]("https://unsplash.com/@adigold1?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText) on [Unsplash]("https://unsplash.com/s/photos/code?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText")
-  
-
----
-
-Include some R output
-
-```{r, fig.height=4}
-# I've set the fig.height to 4 so it fits on the slide
-ggplot(cars, aes(x=speed, y=dist)) + 
-  geom_point() +
-  theme_minimal()
+expedia_data_q1 %>% ggplot(aes(x=checkin_date - search_timestamp, y=price_bucket)) + 
+	geom_point() + 
+	labs(x = "TODO: add x-axis label", 
+		   y = "TODO: add y-axis label", 
+		   title = "TODO: add title") + 
+	geom_smooth(method="lm", se=FALSE) + 
+	theme_minimal() 
 ```
 
----
+--- 
+# TODO: Set up statistical model 
+```{r}
+expedia_data_q1 <- expedia_data %>% 
+  select(is_trans1, is_trans2, is_trans3, price_bucket1, price_bucket2, price_bucket3, 
+         checkin_date, search_timestamp, destination_id) %>% 
+  filter(is_trans1 + is_trans2 + is_trans3 == 1 & 
+           !is.na(checkin_date) & !is.na(search_timestamp) & !is.na(destination_id)) %>%
+  mutate(
+    price_bucket1 = ifelse(is.na(is_trans1) | is_trans1 == 0, 0, price_bucket1),
+    price_bucket2 = ifelse(is.na(is_trans2) | is_trans2 == 0, 0, price_bucket2),
+    price_bucket3 = ifelse(is.na(is_trans3) | is_trans3 == 0, 0, price_bucket2),
+    price_bucket = (price_bucket1 + price_bucket2 + price_bucket3) / (is_trans1 + is_trans2 + is_trans3),
+    search_timestamp = as.Date(as.character(search_timestamp)))
 
-Include the output without showing the code and R messages (which is what you want for your final submission).  This R code chunk also changes the size of the plot: `fig.height=3, fig.width=4` and it's position: `fig.align='center'`.
-
-```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.height=2, fig.width=4, fig.align='center'}
-ggplot(cars, aes(x=speed, y=dist)) + 
-  geom_point() +
-  theme_minimal()
+head(expedia_data_q1, n = 10)
+model <- lm(price_bucket ~ checkin_date - search_timestamp, data = expedia_data_q1)
+summary(model)$coefficients
 ```
 
-This plot shows that there is a positive relationship between distance and speed.
+--- 
+# TODO: Analyze results from statistical model 
+- lack of consumers who transacted one of the first 3 listings. This limits the # of data points available to 9 datapoints. 
+- from the linear regression model, we observe that there is a very weak negative association between [var1] and [var2] 
+- The p-value calculated is 0.384 > 0.1 which implies there is no evidence against the null hypothesis that ... 
+- We can conclude that urgency does not affect the price bucket 
+- However, this result can still be further explored in the future for 2 reasons 
+  ~ 9 data points out of a sample of 1000 users on a site like Expedia is not representative of the population (need to track      all users that transacted some property)
+  ~ Originally, we planned to separate analysis by desinations to avoid pricing disparity due to different locations . However,     the remaining 9 destinations are all from different desination_id's. So, it is possible that the different locations
+    resulted is the lack of correlation / strength of association. 
 
-## Read more
+## Research Question 2 
+Are properties with discounted prices more likely to be sold? 
 
-For more on creating an `beamer` presentation see [https://bookdown.org/yihui/rmarkdown/beamer-presentation.html](https://bookdown.org/yihui/rmarkdown/beamer-presentation.html)
+Motivation of research question: 
 
-You can change the style, colours and fonts in your presentation by picking from a library of available themes. Once you find ones you like, you change the settings in the YAML section at the top of this RMarkdown document.
-[http://deic.uab.es/~iblanes/beamer_gallery/index.html](http://deic.uab.es/~iblanes/beamer_gallery/index.html) 
+--- 
+# TODO: Add visualization 
 
+--- 
+# TODO: Set up statistical model 
+```{r}
 
-# Headings you should include in your project
+```
 
-## Introduction
+--- 
+# TODO: Analyze results from statistical model 
 
-Include here a few sentences to introduce the problem and provide context. You might want to briefly summarize the data in words (what is the data and what is it used for). You can present the questions you are investigating here. 
+## Research Question 3 
+Do the number of infants, children and adults affect the length of travel?
 
-## Objectives (optional)
+--- 
+# TODO: Add visualization 
 
-You can list the questions of interest in complete English sentences here to highlight them. 
+--- 
+# TODO: Set up statistical model 
+```{r}
 
-## Data Summary (optional)
+```
 
-Here you can explain how you cleaned the data and created variables suitable for answering your questions. 
-You can also include graphical displays that either motivated or address the questions.
+--- 
+# TODO: Analyze results from statistical model 
 
-## Statistical Methods
+## Limitations 
 
-Describe here what you have done to the data without presenting any results (output). If you want to indicate variables by symbols or variable names, define them here. 
-
-## Results
-
-Present the main results here, in order of importance, related to the questions asked. You might use tables or graphs, or other ways to summarize your results.
-
-## Conclusion
-
-Give your main conclusions here. Follow the order of questions you presented. 
-
-Here you can also mention any additional considerations, concerns, or issues you might have. For example, if the results were unexpected, you can discuss this and perhaps offer possible explanations.
-
-## References and Acknowledgements (optional)
-
-If you received any help from someone other than your group members you can acknowledge them. For example:   
-*The authors would like to thank "TA name" for their helpful suggestions and comments that improved the presentation of this poster.*
-
-
+## Overall Conclusion
