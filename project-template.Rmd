@@ -147,16 +147,22 @@ expedia_data_q3 %>% ggplot(aes(x=infant_count, y=travel_length)) +
 model_child <- lm(travel_length ~ child_count, data = expedia_data_q3) 
 
 summary(model_child)$coefficients
+summary(model_child)$r.squared
+
 
 
 model_adult <- lm(travel_length ~ adult_count, data = expedia_data_q3) 
 
 summary(model_adult)$coefficients
+summary(model_adult)$r.squared
+
 
 model_infant <- lm(travel_length ~ infant_count, data = expedia_data_q3) 
 
 
 summary(model_infant)$coefficients
+summary(model_adult)$r.squared
+
 
 ```
 
@@ -168,6 +174,7 @@ summary(model_infant)$coefficients
 - p-value for the adult_count model is relatively small (p-value < 5.393e-08) which suggests very strong evidience against the null hypothesis
 - p-value for the infant_count model is relatively small (p-value < 1.393e-02) which suggests strong evidience against the null hypothesis
    ~ more onto the infant sample, it is noticed that only 2 searches have infants in their group which causes small generalizations to be yield here
+- all R^2 values (coefficient of determination)  yields a very small value for all three of the models which could be due to the fact of low variation in the data
 - we can conclude that the number of adults will lead to greater travel lengths
 
 
