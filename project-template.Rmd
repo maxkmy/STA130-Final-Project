@@ -1,6 +1,6 @@
 ---
 title: "Your Project Title (be descriptive and creative!)"
-author: "Group 35: Max Ming Yi Koh (1007972785) and Kevin Le (TODO: add student #)"
+author: "Group 35: Max Ming Yi Koh (1007972785) and Kevin Le (1007952805)"
 date: March 31, 2022
 output: 
   beamer_presentation:
@@ -19,11 +19,9 @@ urlcolor: blue
 # warning=FALSE and message=FALSE will stop R messages from appearing in the knit document
 library(tidyverse)
 library(dplyr)
-
 # here is the data for this project
 expedia_data <- read_csv("ExpediaSearchData.csv")
 glimpse(expedia_data)
-
 # see the Project Overview page for more information: 
 # https://q.utoronto.ca/courses/235890/pages/project-overview
 ```
@@ -49,7 +47,6 @@ expedia_data_q1 <- expedia_data %>%
     price_bucket3 = ifelse(is.na(is_trans3) | is_trans3 == 0, 0, price_bucket2),
     price_bucket = (price_bucket1 + price_bucket2 + price_bucket3) / (is_trans1 + is_trans2 + is_trans3),
     search_timestamp = as.Date(as.character(search_timestamp)))
-
 expedia_data_q1 %>% ggplot(aes(x=checkin_date - search_timestamp, y=price_bucket)) + 
 	geom_point() + 
 	labs(x = "TODO: add x-axis label", 
@@ -62,7 +59,7 @@ expedia_data_q1 %>% ggplot(aes(x=checkin_date - search_timestamp, y=price_bucket
 --- 
 # TODO: Set up statistical model 
 ```{r}
-expedia_data_q1 <- expedia_data %>% 
+expedia_data_q2 <- expedia_data %>% 
   select(is_trans1, is_trans2, is_trans3, price_bucket1, price_bucket2, price_bucket3, 
          checkin_date, search_timestamp, destination_id) %>% 
   filter(is_trans1 + is_trans2 + is_trans3 == 1 & 
@@ -73,10 +70,13 @@ expedia_data_q1 <- expedia_data %>%
     price_bucket3 = ifelse(is.na(is_trans3) | is_trans3 == 0, 0, price_bucket2),
     price_bucket = (price_bucket1 + price_bucket2 + price_bucket3) / (is_trans1 + is_trans2 + is_trans3),
     search_timestamp = as.Date(as.character(search_timestamp)))
-
-head(expedia_data_q1, n = 10)
-model <- lm(price_bucket ~ checkin_date - search_timestamp, data = expedia_data_q1)
-summary(model)$coefficients
+expedia_data_q1 %>% ggplot(aes(x=checkin_date - search_timestamp, y=price_bucket)) + 
+	geom_point() + 
+	labs(x = "TODO: add x-axis label", 
+		   y = "TODO: add y-axis label", 
+		   title = "TODO: add title") + 
+	geom_smooth(method="lm", se=FALSE) + 
+	theme_minimal() 
 ```
 
 --- 
@@ -112,15 +112,64 @@ Do the number of infants, children and adults affect the length of travel?
 
 --- 
 # TODO: Add visualization 
+```{r}
+expedia_data_q3 <- expedia_data %>% select(search_timestamp, adult_count, child_count, infant_count, checkin_date) %>% filter(!is.na(checkin_date) & !is.na(search_timestamp)) %>% mutate(travel_length = as.numeric(as.Date(as.character(checkin_date)) - as.Date(as.character(search_timestamp))))
+
+glimpse(expedia_data_q3)
+
+expedia_data_q3 %>% ggplot(aes(x=child_count, y= travel_length)) + 
+  geom_point() +
+  labs(x="number of children",
+       y="length of travel (days)",
+       title = "TODO: add title") +
+  theme_minimal()
+
+expedia_data_q3 %>% ggplot(aes(x=adult_count, y= travel_length)) + 
+  geom_point() +
+  geom_smooth(se=FALSE, method="lm") +
+  labs(x="number of adults",
+       y="length of travel (days)",
+       title = "TODO: add title") +
+  theme_minimal()
+
+expedia_data_q3 %>% ggplot(aes(x=infant_count, y=travel_length)) + 
+  geom_point() +
+  geom_smooth(se=FALSE, method="lm") +
+  labs(x="number of infants",
+       y="length of travel (days)",
+       title = "TODO: add title") +
+  theme_minimal()
+```
 
 --- 
 # TODO: Set up statistical model 
 ```{r}
+model_child <- lm(travel_length ~ child_count, data = expedia_data_q3) 
+
+summary(model_child)$coefficients
+
+
+model_adult <- lm(travel_length ~ adult_count, data = expedia_data_q3) 
+
+summary(model_adult)$coefficients
+
+model_infant <- lm(travel_length ~ infant_count, data = expedia_data_q3) 
+
+
+summary(model_infant)$coefficients
 
 ```
 
 --- 
 # TODO: Analyze results from statistical model 
+
+- variation of data is weak as 90% of the dataset are with searchs with no children/ infants
+- p-value for the child_count model is approximately 0.563 which suggests that there is weak evidence against the null hypothesis 
+- p-value for the adult_count model is relatively small (p-value < 5.393e-08) which suggests very strong evidience against the null hypothesis
+- p-value for the infant_count model is relatively small (p-value < 1.393e-02) which suggests strong evidience against the null hypothesis
+   ~ more onto the infant sample, it is noticed that only 2 searches have infants in their group which causes small generalizations to be yield here
+- we can conclude that the number of adults will lead to greater travel lengths
+
 
 ## Limitations 
 
