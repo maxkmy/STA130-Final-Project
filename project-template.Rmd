@@ -37,58 +37,75 @@ Does urgency affect how much consumers are willing to pay?
 # TODO: Add visualization 
 ```{r}
 expedia_data_q1 <- expedia_data %>% 
-  select(is_trans1, is_trans2, is_trans3, price_bucket1, price_bucket2, price_bucket3, 
-         checkin_date, search_timestamp, destination_id) %>% 
-  filter(is_trans1 + is_trans2 + is_trans3 == 1 & 
-           !is.na(checkin_date) & !is.na(search_timestamp) & !is.na(destination_id)) %>%
-  mutate(
-    price_bucket1 = ifelse(is.na(is_trans1) | is_trans1 == 0, 0, price_bucket1),
-    price_bucket2 = ifelse(is.na(is_trans2) | is_trans2 == 0, 0, price_bucket2),
-    price_bucket3 = ifelse(is.na(is_trans3) | is_trans3 == 0, 0, price_bucket2),
-    price_bucket = (price_bucket1 + price_bucket2 + price_bucket3) / (is_trans1 + is_trans2 + is_trans3),
-    search_timestamp = as.Date(as.character(search_timestamp)))
-expedia_data_q1 %>% ggplot(aes(x=checkin_date - search_timestamp, y=price_bucket)) + 
-	geom_point() + 
-	labs(x = "TODO: add x-axis label", 
-		   y = "TODO: add y-axis label", 
-		   title = "TODO: add title") + 
-	geom_smooth(method="lm", se=FALSE) + 
-	theme_minimal() 
+  select(is_trans1, is_trans2, is_trans3) %>% 
+  mutate(is_trans1 = ifelse(!is.na(is_trans1) & is_trans1 == 1, 1, 0),
+         is_trans2 = ifelse(!is.na(is_trans2) & is_trans2 == 1, 1, 0), 
+         is_trans3 = ifelse(!is.na(is_trans3) & is_trans3 == 1, 1, 0),
+         trans_made = ifelse(is_trans1 + is_trans2 + is_trans3 > 0, TRUE, FALSE))
+
+
+# plot a bar chart 9 vs 991
+
+
+# expedia_data_q1 <- expedia_data %>% 
+#   select(is_trans1, is_trans2, is_trans3, price_bucket1, price_bucket2, price_bucket3, 
+#          checkin_date, search_timestamp, destination_id) %>% 
+#   filter(is_trans1 + is_trans2 + is_trans3 == 1 & 
+#            !is.na(checkin_date) & !is.na(search_timestamp) & !is.na(destination_id)) %>%
+#   mutate(
+#     price_bucket1 = ifelse(is.na(is_trans1) | is_trans1 == 0, 0, price_bucket1),
+#     price_bucket2 = ifelse(is.na(is_trans2) | is_trans2 == 0, 0, price_bucket2),
+#     price_bucket3 = ifelse(is.na(is_trans3) | is_trans3 == 0, 0, price_bucket2),
+#     price_bucket = (price_bucket1 + price_bucket2 + price_bucket3) / (is_trans1 + is_trans2 + is_trans3),
+#     search_timestamp = as.Date(as.character(search_timestamp)))
+# expedia_data_q1 %>% ggplot(aes(x=checkin_date - search_timestamp, y=price_bucket)) + 
+# 	geom_point() + 
+# 	labs(x = "TODO: add x-axis label", 
+# 		   y = "TODO: add y-axis label", 
+# 		   title = "TODO: add title") + 
+# 	geom_smooth(method="lm", se=FALSE) + 
+# 	theme_minimal() 
 ```
 
 --- 
 # TODO: Set up statistical model 
 ```{r}
-expedia_data_q2 <- expedia_data %>% 
-  select(is_trans1, is_trans2, is_trans3, price_bucket1, price_bucket2, price_bucket3, 
-         checkin_date, search_timestamp, destination_id) %>% 
-  filter(is_trans1 + is_trans2 + is_trans3 == 1 & 
-           !is.na(checkin_date) & !is.na(search_timestamp) & !is.na(destination_id)) %>%
-  mutate(
-    price_bucket1 = ifelse(is.na(is_trans1) | is_trans1 == 0, 0, price_bucket1),
-    price_bucket2 = ifelse(is.na(is_trans2) | is_trans2 == 0, 0, price_bucket2),
-    price_bucket3 = ifelse(is.na(is_trans3) | is_trans3 == 0, 0, price_bucket2),
-    price_bucket = (price_bucket1 + price_bucket2 + price_bucket3) / (is_trans1 + is_trans2 + is_trans3),
-    search_timestamp = as.Date(as.character(search_timestamp)))
-expedia_data_q1 %>% ggplot(aes(x=checkin_date - search_timestamp, y=price_bucket)) + 
-	geom_point() + 
-	labs(x = "TODO: add x-axis label", 
-		   y = "TODO: add y-axis label", 
-		   title = "TODO: add title") + 
-	geom_smooth(method="lm", se=FALSE) + 
-	theme_minimal() 
+set.seed(15)
+sample_means <- rep(NA, 1000) 
+
+for(i in 1:1000) { 
+	# sample for new 25 rows each iteration
+  sample <- expedia_data_q1 %>% sample_n(size = 1000, replace = TRUE)
+  sample_means[i] <- as.numeric(sample %>% summarize(mean(trans_made)))
+}
+
+# convert into a tibble
+sample_means = tibble(trans_proportion = sample_means) 
+
+quantile(sample_means$trans_proportion, c(0.025, 0.975))
+# expedia_data_q2 <- expedia_data %>% 
+#   select(is_trans1, is_trans2, is_trans3, price_bucket1, price_bucket2, price_bucket3, 
+#          checkin_date, search_timestamp, destination_id) %>% 
+#   filter(is_trans1 + is_trans2 + is_trans3 == 1 & 
+#            !is.na(checkin_date) & !is.na(search_timestamp) & !is.na(destination_id)) %>%
+#   mutate(
+#     price_bucket1 = ifelse(is.na(is_trans1) | is_trans1 == 0, 0, price_bucket1),
+#     price_bucket2 = ifelse(is.na(is_trans2) | is_trans2 == 0, 0, price_bucket2),
+#     price_bucket3 = ifelse(is.na(is_trans3) | is_trans3 == 0, 0, price_bucket2),
+#     price_bucket = (price_bucket1 + price_bucket2 + price_bucket3) / (is_trans1 + is_trans2 + is_trans3),
+#     search_timestamp = as.Date(as.character(search_timestamp)))
+# expedia_data_q1 %>% ggplot(aes(x=checkin_date - search_timestamp, y=price_bucket)) + 
+# 	geom_point() + 
+# 	labs(x = "TODO: add x-axis label", 
+# 		   y = "TODO: add y-axis label", 
+# 		   title = "TODO: add title") + 
+# 	geom_smooth(method="lm", se=FALSE) + 
+# 	theme_minimal() 
 ```
 
 --- 
 # TODO: Analyze results from statistical model 
-- lack of consumers who transacted one of the first 3 listings. This limits the # of data points available to 9 datapoints. 
-- from the linear regression model, we observe that there is a very weak negative association between [var1] and [var2] 
-- The p-value calculated is 0.384 > 0.1 which implies there is no evidence against the null hypothesis that ... 
-- We can conclude that urgency does not affect the price bucket 
-- However, this result can still be further explored in the future for 2 reasons 
-  ~ 9 data points out of a sample of 1000 users on a site like Expedia is not representative of the population (need to track      all users that transacted some property)
-  ~ Originally, we planned to separate analysis by desinations to avoid pricing disparity due to different locations . However,     the remaining 9 destinations are all from different desination_id's. So, it is possible that the different locations
-    resulted is the lack of correlation / strength of association. 
+- we are 95% confident that the number of people who transact one of the top 3 listings on Expedia is (0.003, 0.015). This means that if we were to repeat the experiment ...  
 
 ## Research Question 2 
 Are properties with discounted prices more likely to be sold? 
@@ -101,30 +118,51 @@ Motivation of research question:
 --- 
 # TODO: Set up statistical model 
 ```{r}
+untidy_expedia_data_q2 <- expedia_data %>% 
+  select(num_clicks1, is_drr1, num_clicks2, is_drr2, num_clicks3, is_drr3)
 
+expedia_data_q2 <- tibble(num_clicks = c(NA), is_drr = c(NA))
+add_row(expedia_data_q2, num_clicks = 1, is_drr = 2) 
+add_row(expedia_data_q2, num_clicks = 3, is_drr = 4)
+expedia_data_q2
+
+# 
+# for (i in 1:nrow(untidy_expedia_data_q2)) {
+#   add_row(expedia_data_q2, num_clicks = untidy_expedia_data_q2[i,"num_clicks1"], is_drr = untidy_expedia_data_q2[i,"is_drr1"])
+#   add_row(expedia_data_q2, num_clicks = untidy_expedia_data_q2[i,"num_clicks2"], is_drr = untidy_expedia_data_q2[i,"is_drr2"])
+#   add_row(expedia_data_q2, num_clicks = untidy_expedia_data_q2[i,"num_clicks2"], is_drr = untidy_expedia_data_q2[i,"is_drr2"])
+# }
+# 
+# expedia_data_q2 %>% 
+#   filter(!is.na(num_clicks) & !is.na(is_drr))
+# 
+# expedia_data_q2
 ```
 
 --- 
 # TODO: Analyze results from statistical model 
 
 ## Research Question 3 
-Do the number of infants, children and adults affect the length of travel?
+Do the number of children and adults affect the length of travel?
 
 --- 
 # TODO: Add visualization 
 ```{r}
-expedia_data_q3 <- expedia_data %>% select(search_timestamp, adult_count, child_count, infant_count, checkin_date) %>% filter(!is.na(checkin_date) & !is.na(search_timestamp)) %>% mutate(travel_length = as.numeric(as.Date(as.character(checkin_date)) - as.Date(as.character(search_timestamp))))
+expedia_data_q3 <- expedia_data %>% 
+  select(search_timestamp, adult_count, child_count, checkin_date) %>%
+  filter(!is.na(checkin_date) & !is.na(search_timestamp)) %>% 
+  mutate(travel_length = as.numeric(as.Date(as.character(checkin_date)) - as.Date(as.character(search_timestamp))))
 
 glimpse(expedia_data_q3)
 
-expedia_data_q3 %>% ggplot(aes(x=child_count, y= travel_length)) + 
+expedia_data_q3 %>% ggplot(aes(x=child_count, y= travel_length)) +
   geom_point() +
   labs(x="number of children",
        y="length of travel (days)",
        title = "TODO: add title") +
   theme_minimal()
 
-expedia_data_q3 %>% ggplot(aes(x=adult_count, y= travel_length)) + 
+expedia_data_q3 %>% ggplot(aes(x=adult_count, y= travel_length)) +
   geom_point() +
   geom_smooth(se=FALSE, method="lm") +
   labs(x="number of adults",
@@ -132,42 +170,86 @@ expedia_data_q3 %>% ggplot(aes(x=adult_count, y= travel_length)) +
        title = "TODO: add title") +
   theme_minimal()
 
-expedia_data_q3 %>% ggplot(aes(x=infant_count, y=travel_length)) + 
-  geom_point() +
-  geom_smooth(se=FALSE, method="lm") +
-  labs(x="number of infants",
-       y="length of travel (days)",
-       title = "TODO: add title") +
-  theme_minimal()
+# TODO: add model 3 and 4 
+# model 3's starter code 
+mariokart2 %>% ggplot(aes(x = duration, y = total_pr, colour = cond)) + 
+	labs(x = "Duration (in days)", y = "Total Price") + 
+	geom_point() 
+
+# model 4's starter code 
+library(broom)
+augment(model3) # creates dataframe with predicted value in .fitted column 
+# (y_i hat). There is 1 row for each observation in the training data 
+
+mariokart2 %>% ggplot(aes(x = duration, y = total_pr, color = cond)) + 
+	geom_point(alpha = 0.5) +     # alpha controls transparency of points 
+	geom_line(data = augment(model3), aes(y = .fitted, colour = cond)) + 
+	labs(x = "Duration (in days)"), y = "Total price ($)")
 ```
 
 --- 
 # TODO: Set up statistical model 
 ```{r}
-model_child <- lm(travel_length ~ child_count, data = expedia_data_q3) 
+# 4 models (adult vs length, children vs length, adult + children vs length, adult * children vs length)
 
-summary(model_child)$coefficients
-summary(model_child)$r.squared
+set.seed(12) 
+n <- nrow(expedia_data_q3)
+training_indices <- sample(1:n, size=round(0.8 * n)) 
 
+train <- expedia_data_q3 %>% filter(rowid %in% training_indices) 
+y_train <- train$travel_length 
 
+test <- expedia_data_q3 %>% filter(!(rowid %in% training_indices))
+y_test <- test$travel_length 
 
-model_adult <- lm(travel_length ~ adult_count, data = expedia_data_q3) 
+mod1_train <- lm(travel_length ~ adult_count, data = train)
+mod2_train <- lm(travel_length ~ child_count, data = train)
+mod3_train <- lm(travel_length ~ adult_count + child_count, data = train)
+mod4_train <- lm(travel_length ~ adult_count * child_count, data = train)
 
-summary(model_adult)$coefficients
-summary(model_adult)$r.squared
+yhat_mod1_test <- predict(mod1_train, newdata = test)
+yhat_mod2_test <- predict(mod2_train, newdata = test) 
+yhat_mod3_test <- predict(mod3_train, newdata = test) 
+yhat_mod4_test <- predict(mod4_train, newdata = test) 
 
+yhat_mod1_train <- predict(mod1_train, newdata = train)
+yhat_mod2_train <- predict(mod2_train, newdata = train) 
+yhat_mod3_train <- predict(mod3_train, newdata = train) 
+yhat_mod4_train <- predict(mod4_train, newdata = train) 
 
-model_infant <- lm(travel_length ~ infant_count, data = expedia_data_q3) 
+mod1_test_RMSE <- sqrt(sum((y_test - yhat_mod1_test)^2 / nrow(test)))
+mod2_test_RMSE <- sqrt(sum((y_test - yhat_mod2_test)^2 / nrow(test)))
+mod3_test_RMSE <- sqrt(sum((y_test - yhat_mod3_test)^2 / nrow(test)))
+mod4_test_RMSE <- sqrt(sum((y_test - yhat_mod4_test)^2 / nrow(test)))
 
+mod1_train_RMSE <- sqrt(sum((y_train - yhat_mod1_train)^2 / nrow(train)))
+mod2_train_RMSE <- sqrt(sum((y_train - yhat_mod2_train)^2 / nrow(train)))
+mod3_train_RMSE <- sqrt(sum((y_train - yhat_mod3_train)^2 / nrow(train)))
+mod4_train_RMSE <- sqrt(sum((y_train - yhat_mod4_train)^2 / nrow(train)))
 
-summary(model_infant)$coefficients
-summary(model_adult)$r.squared
-
-
+my_table <- tibble(Model = c("1", "2", "3", "4"), 
+	                 RMSE_testdata = c(mod1_test_RMSE, mod2_test_RMSE, 
+		                                 mod3_test_RMSE, mod4_test_RMSE), 
+                   RMSE_traindata = c(mod1_train_RMSE, mod2_train_RMSE, 
+                                      mod3_train_RMSE, mod4_train_RMSE),
+                   ratio_of_RMSEs = RMSE_testdata / RMSE_traindata)
+my_table
+summary(mod1_train)$coefficients
+summary(mod2_train)$coefficients 
+summary(mod3_train)$coefficients 
+summary(mod4_train)$coefficients 
 ```
 
 --- 
 # TODO: Analyze results from statistical model 
+- mention that 4 models are tested
+- talk about model 1 being the best 
+  * simple (in terms of # of predictors) 
+  * RMSE ratio fairly similar in all 4 models (no overfitting) 
+  * RMSE ratio for test data is fairly similar (equally accurate) 
+- based on p-value of 6.675124e-07, there is very strong evidence against the null hypothesis that ... 
+- based on the slope of 9.52, it means that on average for each increase in adult in a trip, the trip's length increases by 9.52 days. 
+
 
 - variation of data is weak as 90% of the dataset are with searchs with no children/ infants
 - p-value for the child_count model is approximately 0.563 which suggests that there is weak evidence against the null hypothesis 
@@ -179,5 +261,7 @@ summary(model_adult)$r.squared
 
 
 ## Limitations 
+- assume that the data filled in is accurate 
+- sample is representative of population (1000 people)
 
 ## Overall Conclusion
