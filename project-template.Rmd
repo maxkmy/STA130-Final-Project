@@ -119,24 +119,26 @@ Motivation of research question:
 # TODO: Set up statistical model 
 ```{r}
 untidy_expedia_data_q2 <- expedia_data %>% 
-  select(num_clicks1, is_drr1, num_clicks2, is_drr2, num_clicks3, is_drr3)
+  select(num_clicks1, is_drr1, num_clicks2, is_drr2, num_clicks3, is_drr3) 
 
 expedia_data_q2 <- tibble(num_clicks = c(NA), is_drr = c(NA))
-add_row(expedia_data_q2, num_clicks = 1, is_drr = 2) 
-add_row(expedia_data_q2, num_clicks = 3, is_drr = 4)
-expedia_data_q2
 
-# 
-# for (i in 1:nrow(untidy_expedia_data_q2)) {
-#   add_row(expedia_data_q2, num_clicks = untidy_expedia_data_q2[i,"num_clicks1"], is_drr = untidy_expedia_data_q2[i,"is_drr1"])
-#   add_row(expedia_data_q2, num_clicks = untidy_expedia_data_q2[i,"num_clicks2"], is_drr = untidy_expedia_data_q2[i,"is_drr2"])
-#   add_row(expedia_data_q2, num_clicks = untidy_expedia_data_q2[i,"num_clicks2"], is_drr = untidy_expedia_data_q2[i,"is_drr2"])
-# }
-# 
-# expedia_data_q2 %>% 
-#   filter(!is.na(num_clicks) & !is.na(is_drr))
-# 
-# expedia_data_q2
+for (i in 1:nrow(untidy_expedia_data_q2)) {
+  expedia_data_q2 <- add_row(expedia_data_q2, 
+                             num_clicks = as.numeric(untidy_expedia_data_q2[i,"num_clicks1"]), 
+                             is_drr = as.numeric(untidy_expedia_data_q2[i,"is_drr1"]))
+  expedia_data_q2 <- add_row(expedia_data_q2, 
+                           num_clicks = as.numeric(untidy_expedia_data_q2[i,"num_clicks2"]), 
+                           is_drr = as.numeric(untidy_expedia_data_q2[i,"is_drr2"]))
+  expedia_data_q2 <- add_row(expedia_data_q2, 
+                           num_clicks = as.numeric(untidy_expedia_data_q2[i,"num_clicks2"]), 
+                           is_drr = as.numeric(untidy_expedia_data_q2[i,"is_drr2"]))
+}
+
+expedia_data_q2 <- expedia_data_q2 %>% 
+  filter(!is.na(num_clicks) & !is.na(is_drr))
+
+expedia_data_q2
 ```
 
 --- 
