@@ -138,7 +138,42 @@ for (i in 1:nrow(untidy_expedia_data_q2)) {
 expedia_data_q2 <- expedia_data_q2 %>% 
   filter(!is.na(num_clicks) & !is.na(is_drr))
 
-expedia_data_q2
+is_drr_mean <- expedia_data_q2 %>% 
+	group_by(is_drr) %>%
+	summarize(means = mean(num_clicks)) 
+
+# diff is a function that calculates the difference between values in a vector
+diff_means <- is_drr_mean %>% 
+	summarize(test_stat = diff(means)) 
+
+test_stat <- as.numeric(diff_means)
+
+# sampling
+set.seed(15) 
+simulated_values <- rep(NA, 1000)
+
+for(i in 1:1000) {
+	simdata <- expedia_data_q2 %>% 
+		mutate(is_drr = sample(is_drr)) 
+	
+	sim_value <- simdata %>%
+		group_by(is_drr) %>%               
+    summarize(mean_clicks=mean(num_clicks)) %>%  
+		summarize(value = diff(mean_clicks))
+	
+	simulated_values[i] <- as.numeric(sim_value) 
+} 
+
+# visualizing the sampling distribution
+sim <- tibble(mean_diff = simulated_values) 
+
+# calculating the p-value 
+num_more_extreme <- sim %>%
+	filter(abs(mean_diff) >= abs(diff_means-test_stat)) %>%
+	summarize(n=n())
+
+p_value <- as.numeric(num_more_extreme) / 1000 
+p_value 
 ```
 
 --- 
