@@ -44,7 +44,11 @@ expedia_data_q1 <- expedia_data %>%
          trans_made = ifelse(is_trans1 + is_trans2 + is_trans3 > 0, TRUE, FALSE))
 
 
-# plot a bar chart 9 vs 991
+ggplot(data = expedia_data_q1, aes(x=trans_made)) + 
+  geom_bar(color="black",
+                 fill="gray") +
+  labs(x="Transaction made", y="Property count",
+       title = "TODO: add title")
 
 
 # expedia_data_q1 <- expedia_data %>% 
