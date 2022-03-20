@@ -182,6 +182,7 @@ p_value
 
 --- 
 # TODO: Analyze results from statistical model 
+- p value 
 
 ## Research Question 3 
 Do the number of children and adults affect the length of travel?
@@ -192,7 +193,9 @@ Do the number of children and adults affect the length of travel?
 expedia_data_q3 <- expedia_data %>% 
   select(search_timestamp, adult_count, child_count, checkin_date) %>%
   filter(!is.na(checkin_date) & !is.na(search_timestamp)) %>% 
-  mutate(travel_length = as.numeric(as.Date(as.character(checkin_date)) - as.Date(as.character(search_timestamp))))
+  mutate(travel_length = as.numeric(as.Date(as.character(checkin_date)) - as.Date(as.character(search_timestamp))),
+         has_child = case_when(child_count > 0 ~ TRUE,
+                               child_count == 0 ~ FALSE))
 
 glimpse(expedia_data_q3)
 
