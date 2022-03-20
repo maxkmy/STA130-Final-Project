@@ -211,21 +211,25 @@ expedia_data_q3 %>% ggplot(aes(x=adult_count, y= travel_length)) +
        title = "TODO: add title") +
   theme_minimal()
 
-# TODO: add model 3 and 4 
 # model 3's starter code 
-mariokart2 %>% ggplot(aes(x = duration, y = total_pr, colour = cond)) + 
-	labs(x = "Duration (in days)", y = "Total Price") + 
+model3 <- lm(travel_length ~ adult_count + has_child, data = expedia_data_q3)
+expedia_data_q3 %>% ggplot(aes(x = adult_count, y = travel_length, colour = has_child)) + 
+	labs(x = "number of adults", y = "length of travel (days)",
+       title = "TODO: add title") + 
+  geom_smooth(method = "lm", se = FALSE) +
 	geom_point() 
 
 # model 4's starter code 
 library(broom)
+model4 <- lm(travel_length ~ adult_count * has_child, data = expedia_data_q3)
 augment(model3) # creates dataframe with predicted value in .fitted column 
 # (y_i hat). There is 1 row for each observation in the training data 
 
-mariokart2 %>% ggplot(aes(x = duration, y = total_pr, color = cond)) + 
+expedia_data_q3 %>% ggplot(aes(x = adult_count, y = travel_length, color = has_child)) + 
 	geom_point(alpha = 0.5) +     # alpha controls transparency of points 
-	geom_line(data = augment(model3), aes(y = .fitted, colour = cond)) + 
-	labs(x = "Duration (in days)"), y = "Total price ($)")
+	geom_line(data = augment(model3), aes(y = .fitted, colour = has_child)) + 
+	labs(x = "number of adults",y = "length of travel (days)",
+       title = "TODO: add title")
 ```
 
 --- 
