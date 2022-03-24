@@ -134,6 +134,13 @@ expedia_data_q2 <- expedia_data_q2 %>%
 expedia_data_q2_summary <- expedia_data_q2 %>% 
   group_by(is_drr) %>% 
   summarize(mean_num_clicks=mean(num_clicks))
+
+expedia_data_q2_summary %>% 
+  ggplot(aes(x=is_drr, y=mean_num_clicks)) + 
+  geom_bar(stat="identity") + 
+  labs(x="Property Discounted",
+       y="Average Number of Clicks",
+       title="Average Number of Clicks for Discounted \n and Non-discounted properties")
 ```
 
 ## Statistical Analysis 2
