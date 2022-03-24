@@ -87,7 +87,7 @@ sample_means <- tibble(trans_proportion = sample_means)
 quantile(sample_means$trans_proportion, c(0.025, 0.975))
 ```
 
-Assuming the sample is representative of the population, this question was investigated by using the bootstrapping method. By resampling from the sample of 1000 and choosing a 95% confidence level, we find that the confidence interval for the proportion of consumers during June $1^{st}$, 2021 and July $31^{st}$, 2021 who purchased a top 3 recommended property is (0.003, 0.015) . 
+Assuming the sample is representative of the population, this question was investigated by using the bootstrapping method. By resampling from the sample of 1,000 and choosing a 95% confidence level, we find that the confidence interval for the proportion of consumers during June $1^{st}$, 2021 and July $31^{st}$, 2021 who purchased a top 3 recommended property is (0.003, 0.015). 
 
 This confidence interval reflects the fact that if we were to repeat the experiment for large number of times, we expect 95% of the confidence intervals generated in a similar manner to ``capture" the true proportion of consumers during June $1^{st}$, 2021 and July $31^{st}$, 2021 is (0.003, 0.015) who purchased a top 3 recommended property. 
 
@@ -134,13 +134,6 @@ expedia_data_q2 <- expedia_data_q2 %>%
 expedia_data_q2_summary <- expedia_data_q2 %>% 
   group_by(is_drr) %>% 
   summarize(mean_num_clicks=mean(num_clicks))
-
-expedia_data_q2_summary %>% 
-  ggplot(aes(x = is_drr, y = mean_num_clicks)) + 
-  geom_histogram() + 
-  labs(x="Discounted Property",
-       y="Mean Number of Clicks",
-       title="Discounted Property Versus \n Mean Number of Clicks") 
 ```
 
 ## Statistical Analysis 2
@@ -182,7 +175,7 @@ After running 3,000 simulations under the assumption that the null hypothesis is
 We highly recommend Expedia to continue investigating how discounts can affect consumer behaviour in order to develop strategic decisions that will improve Expedia's profitability. 
 
 ## Research Question 3
-**Research Question**: Do the number of infants, children and adults affect the length of
+**Research Question**: Do the number of children and adults affect the length of
 travel?
 
 **Hypothesis**: 
@@ -201,7 +194,7 @@ expedia_data_q3 <- expedia_data %>%
   select(adult_count, child_count, infant_count, checkin_date, checkout_date) %>%  
   filter(!is.na(checkin_date) & !is.na(checkout_date)) %>%  
   mutate(travel_length = as.numeric(checkout_date - checkin_date)) %>%  
-  select(adult_count, child_count, infant_count, travel_length) %>%  
+  select(adult_count, child_count, travel_length) %>%  
   rowid_to_column()
 
 expedia_data_q3 %>% ggplot(aes(x=adult_count, y=travel_length)) + 
@@ -222,5 +215,69 @@ training_indices <- sample(1:n, size=round(0.8 * n))
 glimpse(expedia_data_q3)
 
 train <- expedia_data_q3 %>% filter(rowid %in% training_indices)
+y_train <- train$travel_length
 test <- expedia_data_q3 %>% filter(!(rowid %in% training_indices)) 
+y_test <- test$travel_length
+
+mod1_train <- lm(travel_length ~ adult_count, data = train) 
+mod2_train <- lm(travel_length ~ child_count, data = train) 
+mod3_train <- lm(travel_length ~ adult_count + child_count, data = train) 
+mod4_train <- lm(travel_length ~ adult_count * child_count, data = train) 
+
+yhat_mod1_test <- predict(mod1_train, newdata = test) 
+yhat_mod2_test <- predict(mod2_train, newdata = test) 
+yhat_mod3_test <- predict(mod3_train, newdata = test) 
+yhat_mod4_test <- predict(mod4_train, newdata = test) 
+
+yhat_mod1_train <- predict(mod1_train, newdata = train)
+yhat_mod2_train <- predict(mod2_train, newdata = train) 
+yhat_mod3_train <- predict(mod3_train, newdata = train) 
+yhat_mod4_train <- predict(mod4_train, newdata = train) 
+
+mod1_test_RMSE <- sqrt(sum((y_test - yhat_mod1_test)^2 / nrow(test)))
+mod2_test_RMSE <- sqrt(sum((y_test - yhat_mod2_test)^2 / nrow(test)))
+mod3_test_RMSE <- sqrt(sum((y_test - yhat_mod3_test)^2 / nrow(test)))
+mod4_test_RMSE <- sqrt(sum((y_test - yhat_mod4_test)^2 / nrow(test)))
+
+mod1_train_RMSE <- sqrt(sum((y_train - yhat_mod1_train)^2 / nrow(train)))
+mod2_train_RMSE <- sqrt(sum((y_train - yhat_mod2_train)^2 / nrow(train)))
+mod3_train_RMSE <- sqrt(sum((y_train - yhat_mod3_train)^2 / nrow(train)))
+mod4_train_RMSE <- sqrt(sum((y_train - yhat_mod4_train)^2 / nrow(train)))
+
+my_table <- tibble(Model = c("1", "2", "3", "4"), 
+	                 RMSE_testdata = c(mod1_test_RMSE, mod2_test_RMSE, 
+		                                 mod3_test_RMSE, mod4_test_RMSE), 
+                   RMSE_traindata = c(mod1_train_RMSE, mod2_train_RMSE, 
+                                      mod3_train_RMSE, mod4_train_RMSE),
+                   ratio_of_RMSEs = RMSE_testdata / RMSE_traindata)
+
+my_table
+summary(mod1_train)$r.squared
 ```
+
+After trying several linear regression models (e.g. simple, multiple, multiple interactive), we have selected a model that best explains the association between the travellers and the length of the trip. Picking based on good prediction accuracy, low signs of overfitting and simplicity, we find that it is sufficient to only consider how many adults are on a trip when predicting the length of the trip. 
+
+Based on the p-value of `r round(5.546797e-04, digits=6)` which is extremely small, there is strong evidence against the null hypothesis that there is no relationship between the number of adults on a trip and the length of a trip. Thus, we reject the null hypothesis. 
+
+The calculated slope of `r round(0.4257908, digits=4)` implies that for each additional adult, the length of trip increases by `r round(0.4257908, digits=4)` days. With this said, the $R^2$ value of `r round(summary(mod1_train)$r.squared,4)` implies that only `r round(summary(mod1_train)$r.squared,4) * 100`% of variability in the length of trip is accounted by the number of adults on the trip. Certainly, Expedia may choose to continue to explore what variables (along with the number of adults) can better explain the variability in the length of a trip. 
+
+## Limitations 
+
+* The data filled in by users is 100% accurate. Inaccurate data being entered to the search engine will skew statistical results. 
+
+* The sample is representative of the population. If not, statistical models (especially bootstrapping) will not yield accurate results. 
+
+* For the second research question, whether a property is transacted is a better metric compared to the number of clicks a property receives in terms of measuring interest. However, only 9 properties have been transacted out of the 3,000 properties recorded. Due to lack of data, we chose to use the number of clicks as the metric. 
+
+* For the third research question, originally we intended to research how the number of adults, children and _infants_ affect the length of travel. However, only 9 data points had infants in the travel group. Due to insufficient data, we chose to remove the number of infants as a predictor variable. 
+
+## Overall Conclusion - Looking Ahead Part 1
+We believe that all 3 research questions have been answered. Here are some closing thoughts for these research questions: 
+
+For the **first research question**, the 95% confidence interval for the proportion of top 3 properties transacted is (0.003, 0.015). While further statistical analysis can be performed to obtain more accurate estimates (e.g. by using larger and more representative datasets), we believe the main takeaway here is that Expedia's recommendation algorithm has room for improvement. Expedia should devote more human resource into research and development of such algorithms to improve the profitability of the business. 
+
+## Overall Conclusion - Looking Ahead Part 2
+
+For the **second research question**, there is weak evidence against the null hypothesis that the mean number of clicks for discounted and non-discounted properties is the same. Unlike the first research question, we recommend Expedia to continue researching how consumer behaviour is affected by discounts as their behaviour directly affects strategic business decisions. Having a better understanding of how discounts affect transactions, Expedia may choose to perform cost and benefit analysis to see how to optimize profits. 
+
+For the **third research question**, it is found that as the number of adults increases, the length of travel increases. However, the $R^2$ value calculated is low. Thus, we recommend Expedia to continue explore how other variables (even the ones that do not appear in the current dataset) affect the length of travel. Expedia may choose to consider this model when purchasing properties in bulk or advising hoteliers regarding expected intervals of consumers. This will improve the likelihood of meeting consumer needs in terms of booking length and may increase the number of properties transacted.
