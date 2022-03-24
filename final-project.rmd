@@ -1,0 +1,226 @@
+---
+title: "Exploring the Expedia Recommendation Algorithm"
+author: 'Group 35: Max Ming Yi Koh (1007972785) and Kevin Le (1007952805)'
+date: "March 31, 2022"
+output:
+  beamer_presentation:
+    theme: Pittsburgh
+    colortheme: orchid
+    fonttheme: structurebold
+    slide_level: 2
+  pdf_document: default
+classoption: aspectratio=169
+fontsize: 11pt
+urlcolor: blue
+---
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+# echo=FALSE will stop the code chunk from appearing in the knit document
+# warning=FALSE and message=FALSE will stop R messages from appearing in the knit document
+library(tidyverse)
+library(dplyr)
+# here is the data for this project
+expedia_data <- read_csv("ExpediaSearchData.csv")
+# see the Project Overview page for more information: 
+# https://q.utoronto.ca/courses/235890/pages/project-overview
+```
+
+## General Motivations
+Expedia is a website that generates revenue by reselling bookings (purchased in bulk at discounted pricing) or by earning commissions from hoteliers. Thus, an effective recommendation algorithm that recognizes consumer needs is crucial to optimize Expedia's user experience and result in a better bottom line. 
+
+Thus, this leads to the investigation of the quality of Expedia's recommendation algorithm and how various factors can affect purchasing decisions of consumers. This will be explored by probing into 3 research questions. 
+
+The dataset provided includes data of 1,000 consumer searches along with details of some common search filters during the period of June $1^{st}$, 2021 and July $31^{st}$, 2021. So, the sample of the research consists of these 1,000 consumer searches while the population of the research consists of all consumers that made an Expedia search during the period of June $1^{st}$, 2021 and July $31^{st}$, 2021.
+
+## Data Summary
+Below is a table of variables used in all 3 research problems. Note that {n} is a placeholder for values 1, 2, or 3. 
+ 
+| Variable      | Description                                                           |
+|---------------|-----------------------------------------------------------------------|
+| is_trans{n}   | describes whether the consumer transacted the n-th displayed property |
+| is_drr{n}     | describes whether the n-th displayed property is discounted           |
+| num_clicks{n} | number of clicks for the n-th displayed property                      |
+| checkin_date  | stay start date                                                       |
+| checkout_date | stay end date                                                         |
+| adult_count   | number of adults on the trip                                          |
+| child_count   | number of children on the trip                                        |
+
+
+## Research Question 1
+**Research Question**: What is the proportion of consumers during June $1^{st}$, 2021 and July $31^{st}$, 2021 that purchase one of the top 3 recommended properties? 
+
+**Research Motivation**: The proportion of consumers who purchase one of the top 3 recommended properties is a good metric to measure the effectiveness of Expedia's recommendation algorithm. A higher proportion implies the algoirthm is effective at recognizing consumer needs while a lower proportion implies the algorithm is less effective at recognizing consumer needs. 
+
+## Visualization 1
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.height=3, fig.width=4, fig.align='center'}
+expedia_data_q1 <- expedia_data %>% 
+  select(is_trans1, is_trans2, is_trans3) %>% 
+  mutate(is_trans1 = ifelse(!is.na(is_trans1) & is_trans1 == 1, 1, 0),
+         is_trans1 = ifelse(!is.na(is_trans1) & is_trans1 == 1, 1, 0),
+         is_trans1 = ifelse(!is.na(is_trans1) & is_trans1 == 1, 1, 0), 
+         trans_made = ifelse(is_trans1 + is_trans2 + is_trans3 > 0, TRUE, FALSE)
+  ) 
+
+expedia_data_q1 %>%  
+  ggplot(aes(x=trans_made)) + 
+  geom_bar(color="black", fill="gray") + 
+  labs(x="Transaction Made By Consumer", 
+       y="Count (out of 1000)", 
+       title="Number of Top 3 Recommended \n Properties Transacted")
+```
+
+This figure shows that only 9 out of 1000 consumers in the sample purchase a top 3 search result recommended by Expedia's searching algorithm. 
+
+## Statistical Analysis 1
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.height=3, fig.width=4, fig.align='left', results="hide"}
+set.seed(15) 
+sample_means <- rep(NA, 1000)
+n <- nrow(expedia_data_q1) 
+
+for (i in 1:n) {
+  sample <- expedia_data_q1 %>% sample_n(size=1000, replace=TRUE)
+  sample_means[i] <- as.numeric(sample %>% summarize(mean(trans_made)))
+}
+
+sample_means <- tibble(trans_proportion = sample_means) 
+quantile(sample_means$trans_proportion, c(0.025, 0.975))
+```
+
+Assuming the sample is representative of the population, this question was investigated by using the bootstrapping method. By resampling from the sample of 1000 and choosing a 95% confidence level, we find that the confidence interval for the proportion of consumers during June $1^{st}$, 2021 and July $31^{st}$, 2021 who purchased a top 3 recommended property is (0.003, 0.015) . 
+
+This confidence interval reflects the fact that if we were to repeat the experiment for large number of times, we expect 95% of the confidence intervals generated in a similar manner to ``capture" the true proportion of consumers during June $1^{st}$, 2021 and July $31^{st}$, 2021 is (0.003, 0.015) who purchased a top 3 recommended property. 
+
+The calculated confidence interval has relatively low endpoints of 0.003 and 0.015. Thus, we believe that this proportion can be improved and recommend Expedia to continue to invest time and effort to build a recommendation algorithm that will result in a higher proportion of top 3 recommended properties being purchased. 
+
+## Research Question 2
+**Research Question**: Are discounted properties during the period of June $1^{st}$, 2021 and July $31^{st}$, 2021 more likely to result in more clicks? 
+
+**Hypothesis:** 
+
+$H_0: \mu_{discount} - \mu_{no discount} = 0$ 
+
+$H_1: \mu_{discount} - \mu_{no discount} \neq 0$ 
+
+where $\mu_{discount}$ is the mean number of clicks received by discounted properties and $\mu_{no discount}$ is the mean number of clicks received by non-discounted properties during June $1^{st}$, 2021 and July $31^{st}$, 2021. 
+
+**Research Motivation**: 
+The population of interest represents all properties listed during June $1^{st}$, 2021 and July $31^{st}$, 2021. Determining whether users are more interested in discounted properties (by using number of clicks as a metric) helps Expedia make strategic decisions. For example, if users are more interested in discounted properties, it may be in Expedia's interest to discount more properties to attract consumers. 
+
+## Visualization 2
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.height=3, fig.width=4, fig.align='center'}
+untidy_expedia_data_q2 <- expedia_data %>% 
+  select(num_clicks1, is_drr1, num_clicks2, is_drr2, num_clicks3, is_drr3)
+
+expedia_data_q2 <- tibble(num_clicks=c(NA), is_drr=c(NA))
+n <- nrow(untidy_expedia_data_q2)
+
+for (i in 1:n) {
+  expedia_data_q2 <- add_row(expedia_data_q2, 
+                             num_clicks = as.numeric(untidy_expedia_data_q2[i, "num_clicks1"]),
+                             is_drr = as.numeric(untidy_expedia_data_q2[i, "is_drr1"]))
+  expedia_data_q2 <- add_row(expedia_data_q2, 
+                             num_clicks = as.numeric(untidy_expedia_data_q2[i, "num_clicks2"]),
+                             is_drr = as.numeric(untidy_expedia_data_q2[i, "is_drr2"]))
+  expedia_data_q2 <- add_row(expedia_data_q2, 
+                             num_clicks = as.numeric(untidy_expedia_data_q2[i, "num_clicks2"]),
+                             is_drr = as.numeric(untidy_expedia_data_q2[i, "is_drr2"]))
+}
+
+expedia_data_q2 <- expedia_data_q2 %>% 
+  filter(!is.na(num_clicks) & !is.na(is_drr)) %>% 
+  mutate(is_drr = ifelse(is_drr == 1, TRUE, FALSE))
+
+expedia_data_q2_summary <- expedia_data_q2 %>% 
+  group_by(is_drr) %>% 
+  summarize(mean_num_clicks=mean(num_clicks))
+
+expedia_data_q2_summary %>% 
+  ggplot(aes(x = is_drr, y = mean_num_clicks)) + 
+  geom_histogram() + 
+  labs(x="Discounted Property",
+       y="Mean Number of Clicks",
+       title="Discounted Property Versus \n Mean Number of Clicks") 
+```
+
+## Statistical Analysis 2
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.height=3, fig.width=4, fig.align='left', results="hide"}
+test_stat <- expedia_data_q2_summary %>%  
+  summarize(test_stat=diff(mean_num_clicks)) %>%  
+  as.numeric()
+
+set.seed(15) 
+
+n <- nrow(expedia_data_q2)
+simulated_values <- rep(NA, n)
+
+for (i in 1:n) {
+  simdata <- expedia_data_q2 %>% 
+    mutate(is_drr = sample(is_drr)) 
+  
+  simulated_values[i] <- simdata %>% 
+    group_by(is_drr) %>% 
+    summarize(mean_num_clicks=mean(num_clicks)) %>%  
+    summarize(mean_clicks_diff = diff(mean_num_clicks)) %>%  
+    as.numeric()
+}
+
+simulated_values <- tibble(mean_clicks_diff = simulated_values) 
+
+more_extreme_simulated_values <- simulated_values %>% 
+  filter(abs(mean_clicks_diff) >= abs(test_stat)) %>%  
+  summarize(size = n())
+
+p_value <- as.numeric(more_extreme_simulated_values) / n
+p_value
+```
+
+The calculated test statistic from the dataset for the difference between the mean number of clicks for discounted and non-discounted properties is `r round(test_stat, digits=4)`. This means that within the samples, discounted properties get `r round(test_stat, digits=4)` less clicks than non-discounted properties on average. 
+
+After running 3,000 simulations under the assumption that the null hypothesis is true, the p-value is found to be `r round(p_value, digits=4)`. Since the p-value is between 0.05 and 0.1, there is weak evidence against the null hypothesis. 
+
+We highly recommend Expedia to continue investigating how discounts can affect consumer behaviour in order to develop strategic decisions that will improve Expedia's profitability. 
+
+## Research Question 3
+**Research Question**: Do the number of infants, children and adults affect the length of
+travel?
+
+**Hypothesis**: 
+
+$H_0: \beta_1 = 0 \text { OR } \beta_2 = 0 \text{ OR } \beta_3 = 0  \text{ OR } ... \  \beta_n = 0$ 
+
+$H_1: \beta_1 \neq 0 \text{ AND } \beta_2 \neq 0 \text{ AND } \beta_3 \neq 0 \text { AND } ... \  \beta_n = 0$ 
+
+where $\beta_1, \beta_2, \beta_3, ... \beta_n$ are slope parameters for the linear regression where the predictor variables are the number of infants, children and adults and the response variable is the time difference between a check-out date and a check-in date (i.e. length of travel). 
+
+**Research Motivation**: As mentioned, Expedia rents properties or charges commissions from hoteliers. Thus, it is crucial to know how long a property should be rented or advise how hotels how to optimize their booking intervals to tailor to consumer's needs. For instance, a hotel with more rooms may way to increase booking intervals if it is found that length of travel is positively correlated with the number of people on the trip. 
+
+## Visualization 3
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.height=3, fig.width=4, fig.align='center'}
+expedia_data_q3 <- expedia_data %>%  
+  select(adult_count, child_count, infant_count, checkin_date, checkout_date) %>%  
+  filter(!is.na(checkin_date) & !is.na(checkout_date)) %>%  
+  mutate(travel_length = as.numeric(checkout_date - checkin_date)) %>%  
+  select(adult_count, child_count, infant_count, travel_length) %>%  
+  rowid_to_column()
+
+expedia_data_q3 %>% ggplot(aes(x=adult_count, y=travel_length)) + 
+  geom_point() + 
+  geom_smooth(se=FALSE, method="lm") + 
+  labs(x="Number of Adults",
+       y="Average length of Travel (Days)",
+       title="Number of Adults Versus \n Average Length of Travel") + 
+  theme_minimal()
+```
+
+
+## Statistical Analysis 3 
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.height=3, fig.width=4, fig.align='left', results="hide"}
+set.seed(15) 
+n <- nrow(expedia_data_q3)
+training_indices <- sample(1:n, size=round(0.8 * n))
+glimpse(expedia_data_q3)
+
+train <- expedia_data_q3 %>% filter(rowid %in% training_indices)
+test <- expedia_data_q3 %>% filter(!(rowid %in% training_indices)) 
+```
