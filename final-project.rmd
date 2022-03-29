@@ -71,7 +71,7 @@ Below is a table of variables used in all 3 research problems. Note that {n} is 
 * Lastly, using the redefined is_trans1, is_trans2 and is_trans3 columns, we applied the `mutate()` function to create a new logical variable named trans_made which checks if any of is_trans1, is_trans2 or is_trans3 are set to 1.
 
 ## Research Question 1 - Data Visualization
-```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.height=3, fig.width=4, fig.align='center'}
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.height=2.5, fig.width=3.5, fig.align='center'}
 expedia_data_q1 <- expedia_data %>% 
   select(is_trans1, is_trans2, is_trans3) %>% 
   mutate(is_trans1 = ifelse(!is.na(is_trans1) & is_trans1 == 1, 1, 0),
@@ -85,7 +85,7 @@ expedia_data_q1 %>%
   geom_bar(color="black", fill="gray") + 
   labs(x="Transaction made by users for any \n of top 3 recommended properties",
        y="Count", 
-       title="Number of users who have transacted \nor have not transacted top 3 \nrecommended properties out of \n1,000 users")
+       title="Number of users who transacted \nor have not transacted top 3 \nrecommended properties out of \n1,000 total users")
 ```
 
 This figure shows that 9 out of 1,000 consumers in the sample purchase a top 3 search result recommended by Expedia's searching algorithm. 
@@ -102,44 +102,42 @@ for (i in 1:n) {
 }
 
 sample_means <- tibble(trans_proportion = sample_means) 
-quantile(sample_means$trans_proportion, c(0.025, 0.975))
+confidence_interval <- quantile(sample_means$trans_proportion, c(0.025, 0.975))
 ```
 
 * We assume that the sample is representative of the population in order to perform bootstrapping. 
 
-* By resampling from the sample of 1,000 users for 3,000 times and choosing a 95% confidence level, we find the confidence interval for the proportion of users during June $1^{st}$, 2021 and July $31^{st}$, 2021 who purchased a top 3 recommended property is (0.003, 0.015).
+* By resampling from the sample of 1,000 users for 3,000 repetitions and choosing a 95% confidence level, we find the confidence interval for the proportion of users during June $1^{st}$, 2021 and July $31^{st}$, 2021 who purchased a top 3 recommended property is (`r confidence_interval[1]`, `r confidence_interval[2]`).
   
-* A confidence level 95% means that 95% of confidence interval generated in a similar manner (i.e. same 1,000 user data and 3,000 repetitions) will capture the true proportion of consumers during June $1^{st}$, 2021 and July $31^{st}$, 2021 who purchased a top 3 recommended property.
+* A confidence level 95% means that 95% of confidence interval generated in a similar manner (i.e. resampling from the sample of 1,000 user data 3,000 times) will capture the true proportion of consumers during June $1^{st}$, 2021 and July $31^{st}$, 2021 who purchased a top 3 recommended property.
 
-* The calculated confidence interval (i.e. $0.015 - 0.003 = 0.012$) is very narrow. This means we expect the true true proportion to be very similar to the estimate made. 
+* The width of the confidence interval (i.e. $0.015 - 0.003 = 0.012$) is very narrow. So, we expect the true true proportion to be very similar to the estimate made. 
 
 ## Research Question 2 - Introduction
 **Research Question**: Are discounted properties during the period of June $1^{st}$, 2021 and July $31^{st}$, 2021 more likely to result in more clicks? 
 
 **Hypothesis:** 
 
-$H_0: \mu_{no\ discount} - \mu_{discount} = 0$ 
+$H_0: \mu_{no\ discount} - \mu_{discount} = 0$
 
 $H_1: \mu_{no\ discount} - \mu_{discount} \neq 0$ 
 
-where $\mu_{discount}$ is the mean number of clicks received by discounted properties and $\mu_{no\ discount}$ is the mean number of clicks received by non-discounted properties during June $1^{st}$, 2021 and July $31^{st}$, 2021. 
+where $\mu_{no\ discount}$ and $\mu_{discount}$ are the mean number of clicks for non-discounted and discounted properties respectively during June $1^{st}$, 2021 and July $31^{st}$, 2021. 
 
 **Research Motivation**: 
 
-* Here, the population of interest consists of all properties listed during June $1^{st}$, 2021 and July $31^{st}$, 2021. 
+* The population of interest consists of all properties listed during June $1^{st}$, 2021 and July $31^{st}$, 2021. 
 
-* Determining whether users are more interested in discounted properties (by using number of clicks as a metric for interest) helps Expedia make strategic decisions. 
-
-* For instance, if users are more interested in discounted properties, it may be in Expedia's interest to discount more properties to attract consumers. 
+* Hypothetically, if users are more interested in discounted listings, it may be in Expedia's interest to discount more listings to attract more consumers. 
 
 ## Research Question 2 - Data Processing
 * We applied the `select()` function to obtain the required variables, namely num_clicks1, num_clicks2, num_clicks3, is_drr1, is_drr2 and is_drr3. 
 
-* To tidy the data (due to change in population), we ran a for loop to reshape the tibble to have rows which represent individual listings. The new tibble has variables num_clicks and is_drr. 
+* To tidy the data (due to change in population), we ran a for loop to reshape the tibble to have rows which represent listings instead of user search results. The new tibble has variables num_clicks and is_drr. 
 
 * We applied the `filter()` function to remove listings where num_clicks or is_drr are missing. 
 
-* We applied the `mutate()` function to make is_drr a logical variable. 
+* We applied the `mutate()` function to make is_drr a logical variable representing whether a property is discounted. 
 
 * We applied the `group_by()` and `summarise` functions to obtain the mean number of clicks for discounted and non-discounted listings. 
 
@@ -213,14 +211,16 @@ p_value
 
 * The calculated test statistic from the dataset for the difference between the mean number of clicks for discounted and non-discounted properties is `r round(test_stat, digits=4)`. 
 
-* This means that within the samples, discounted properties get `r round(test_stat, digits=4)` less clicks than non-discounted properties on average. 
+* This means that within the samples, discounted properties get `r -round(test_stat, digits=4)` less clicks than non-discounted properties on average. 
 
 * After running 5,000 simulations under the assumption that the null hypothesis is true, the p-value is found to be `r round(p_value, digits=4)`. 
 
 * Since the p-value is between 0.01 and 0.05, there is moderate evidence against the null hypothesis which states that the mean number of clicks for discounted and non-discounted properties is the same. 
 
+* The implication of this result will be further discussed in the conclusion section.
+
 ## Research Question 3 - Introduction
-**Research Question**: Do the number of children and adults affect the length of
+**Research Question**: Do the number of adults and children on a trip affect the length of
 travel?
 
 **Hypothesis**: 
@@ -229,13 +229,11 @@ $H_0: \beta_1 = 0 \text { OR } \beta_2 = 0 \text{ OR }... \  \beta_n = 0$
 
 $H_1: \beta_1 \neq 0 \text{ AND } \beta_2 \neq 0 \text{ AND }... \  \beta_n \neq 0$ 
 
-where $\beta_1, \ \beta_2, \ ..., \ \beta_n$ are slope parameters for the linear regression where the predictor variables are the number of infants, children and adults and the response variable is the time difference between a check-out date and a check-in date (i.e. length of travel). 
+where $\beta_1, \ \beta_2, \ ..., \ \beta_n$ are slope parameters for the linear regression where the predictor variables are the number of children and adults and the response variable is the time difference between a check-out date and a check-in date (i.e. length of travel). 
 
 **Research Motivation**: 
 
-* As mentioned, Expedia rents properties or charges commissions from hoteliers.
-
-* Thus, knowing how long a property should be rented or advising how hotels should schedule booking intervals to tailor consumer needs is important. 
+* Knowing how long a property should be rented or advising how hotels should schedule booking intervals to tailor consumer needs is important. 
 
 * For instance, a property with more rooms can fit more travelers. If it is found that length of travel is positively correlated with the number of people on a trip, then the property should expect for longer booking intervals. 
 
@@ -249,7 +247,7 @@ where $\beta_1, \ \beta_2, \ ..., \ \beta_n$ are slope parameters for the linear
 
 * We applied the `select()` function to select the required variables, namely adult_count, child_count and travel_length. 
 
-* To perform linear regression, we applied the `rowid_to_column()` function to add a unique identifier to each row. 
+* To perform linear regression, we applied the `rowid_to_column()` function to add a unique identifier to each row in the tibble. 
 
 ## Research Question 3 - Visualization
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.height=3, fig.width=4, fig.align='center'}
@@ -307,29 +305,30 @@ mod2_train_RMSE <- sqrt(sum((y_train - yhat_mod2_train)^2 / nrow(train)))
 mod3_train_RMSE <- sqrt(sum((y_train - yhat_mod3_train)^2 / nrow(train)))
 mod4_train_RMSE <- sqrt(sum((y_train - yhat_mod4_train)^2 / nrow(train)))
 
-my_table <- tibble(Model = c("1", "2", "3", "4"), 
-	                 RMSE_testdata = c(mod1_test_RMSE, mod2_test_RMSE, 
-		                                 mod3_test_RMSE, mod4_test_RMSE), 
-                   RMSE_traindata = c(mod1_train_RMSE, mod2_train_RMSE, 
-                                      mod3_train_RMSE, mod4_train_RMSE),
-                   ratio_of_RMSEs = RMSE_testdata / RMSE_traindata)
+model_comparison_table <- tibble(Model = c("1", "2", "3", "4"), 
+                                 RMSE_testdata = c(mod1_test_RMSE, mod2_test_RMSE,
+                                                   mod3_test_RMSE, mod4_test_RMSE),
+                                 RMSE_traindata = c(mod1_train_RMSE, mod2_train_RMSE,
+                                                    mod3_train_RMSE, mod4_train_RMSE),
+                                 ratio_of_RMSEs = RMSE_testdata / RMSE_traindata)
 
-my_table
+model_comparison_table
 summary(mod1_train)$r.squared
 summary(mod2_train)$r.squared
 summary(mod3_train)$r.squared
 summary(mod4_train)$r.squared
+coefficients <- summary(mod1_train)$coefficients
 ```
 
-* After trying several linear regression models (e.g. simple, multiple regression with or without interaction), we have found a model that best explains the association between the number and type of travelers and length of the trip. 
+* After trying several linear regression models (e.g. simple, multiple regression with or without interaction), we have found a model that "best" explains the association between the number and type of travelers and length of the trip. 
 
-* By picking model based on prediction accuracy, low signs of overfitting and simplicity, we find it is sufficient to only consider how many adults are on a trip to predict the length of the trip. 
+* By picking the "best" model based on prediction accuracy, low signs of overfitting and simplicity, we find it is sufficient to only consider how many adults are on a trip to predict the length of the trip. 
 
-* Based on the p-value of `r round(5.546797e-04, digits=6)` which is extremely small, there is very strong evidence against the null hypothesis that there is no relationship between the number of adults on a trip and the length of a trip. Due to the extremely small p-value, we can reject the null hypothesis. 
+* Based on the p-value of `r round(5.546797e-04, digits=6)` which is extremely small, there is very strong evidence against the null hypothesis that there is no relationship between the number of adults on a trip and the length of a trip. Due to the extremely small p-value, we reject the null hypothesis. 
 
 * The calculated slope of `r round(0.4257908, digits=4)` implies that for each additional adult, the length of trip increases by `r round(0.4257908, digits=4)` days on average. 
 
-* With this said, the $R^2$ value of `r round(summary(mod1_train)$r.squared,4)` implies that only `r round(summary(mod1_train)$r.squared,4) * 100`% of variability in the length of trip is accounted by the number of adults on the trip. 
+* With this said, the $R^2$ value of `r round(summary(mod1_train)$r.squared,4)` for the linear regression model implies only `r round(summary(mod1_train)$r.squared,4) * 100`% of variability in the length of trip is accounted by the number of adults on the trip. 
 
 ## Limitations 
 
@@ -337,36 +336,38 @@ summary(mod4_train)$r.squared
 
 * The sample is representative of the population. If not, statistical models (especially bootstrapping) will not yield accurate results. 
 
-* For the second research question, whether a property is transacted is a better metric compared to the number of clicks a property receives in terms of measuring interest. However, only 9 properties have been transacted out of the 3,000 properties recorded. Due to lack of data, we chose to use the number of clicks as the metric. 
+* For the second research question, whether a property is transacted is a better metric of consumer interest compared to number of clicks a property receives. However, only 9 properties are transacted out of the 3,000 properties. Due to lack of data, we used the number of clicks as the metric. 
 
-* For the third research question, originally we intended to research how the number of adults, children and _infants_ affect the length of travel. However, only 9 data points had infants in the travel group. Due to insufficient data, we chose to remove the number of infants as a potential predictor variable. 
+* For the third research question, we intended to research how the number of adults, children and _infants_ affect the length of travel. However, only 9 data points had infants in their travel group. Due to lack of data, we removed the number of infants as a potential predictor variable. 
 
 ## Overall Conclusion - Looking Ahead Part 1
-Here are some closing thoughts to each individual research question.
+Here are some closing thoughts for each research question.
 
 For the **first research question**, 
 
-* The 95% confidence interval for the proportion of top 3 recommended listings transacted is (0.003, 0.015). 
+* The 95% confidence interval for the proportion of top 3 recommended listings transacted is (`r confidence_interval[1]`, `r confidence_interval[2]`). 
 
-* The bounds of the interval are low which implies the recommendation has much room for improvement. We recommend Expedia to invest in research and development of recommendation algorithms which directly improves the profitability of the business. 
+* The bounds of the interval are low which implies the recommendation algorithm has room for improvement. We recommend Expedia to invest in research and development of recommendation algorithms can improve the profitability of the business. 
 
+## Overall Conclusion - Looking Ahead Part 2
 For the **second research question**, 
 
 * It was found that there is weak evidence against the null hypothesis that the mean number of clicks for discounted and non-discounted properties is the same. 
 
-* We recommend Expedia to perform A/B testing with variation of your website with more or less discounted properties to see how users consumption behaviour changes$^{[2]}$. 
+* We recommend Expedia to perform A/B testing with variations of the website website with more or less discounted properties to see how users consumption behaviour changes$^{[2]}$. 
 
-* This may lead to developing new strategic business decisions in terms of increasing or decreasing the number of discounted properties on the webpage.  
+* This may lead to developing new marketing strategies in terms of increasing or decreasing the number of discounted properties on the webpage to optimize profits.  
 
-## Overall Conclusion - Looking Ahead Part 2
-
+## Overall Conclusion - Looking Ahead Part 3
 For the **third research question**, 
 
 * It is found that as the number of adults increases, the length of travel increases. 
 
-* Expedia can consider this model when purchases properties in bulk or advising hoteliers regarding the expected interval of booking. 
+* Expedia can consider the linear regression model when purchases properties in bulk or advising hoteliers regarding the expected interval of booking. 
 
-* However, the low $R^2$ value implies there are other variables that explain the variability in travel length. To get a more "complete" model, Expedia may choose to continue to explore how other variables (including variables that do not appear in the current dataset) affect length of travel. 
+* However, the low $R^2$ value of `r summary(mod1_train)$r.squared` implies there are other variables that explain the variability in travel length. 
+
+* To get a more "complete" model, Expedia may choose to continue to explore how other variables (including variables that do not appear in the current dataset) affect length of travel. 
 
 ## Citations 
 
