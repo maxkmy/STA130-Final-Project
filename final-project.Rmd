@@ -43,19 +43,19 @@ expedia_data <- read_csv("ExpediaSearchData.csv")
 ## Data Summary
 Below is a table of variables used in all 3 research problems. Note that {n} is a placeholder for integers 1, 2, or 3. 
  
-| Variable      	| Description                                                                                  	|
-|-----------------|-----------------------------------------------------------------------------------------------|
-| is_trans{n}   	|  whether the consumer transacted the n-th displayed property within 180 minutes of the search |
-| is_drr{n}     	|  whether the n-th displayed property is discounted                                            |
-| num_clicks{n} 	|  number of clicks for the n-th displayed property within 180 minutes of the search            |
-| checkin_date  	|  stay start date                                                                              |
-| checkout_date 	|  stay end date                                                                                |
-| adult_count   	|  number of adults on the trip                                                                 |
-| child_count   	|  number of children on the trip                                                               |
+| Variable      	| Description                                                                                  	   |
+|-----------------|--------------------------------------------------------------------------------------------------|
+| is_trans{n}   	|  whether the consumer transacted the n-th displayed property within 180 minutes of a user search |
+| is_drr{n}     	|  whether the n-th displayed property is discounted                                               |
+| num_clicks{n} 	|  number of clicks for the n-th displayed property within 180 minutes of a user search            |
+| checkin_date  	|  stay start date                                                                                 |
+| checkout_date 	|  stay end date                                                                                   |
+| adult_count   	|  number of adults on the trip                                                                    |
+| child_count   	|  number of children on the trip                                                                  |
 
 
 ## Research Question 1 - Introduction
-**Research Question**: What is the proportion of consumers during June $1^{st}$, 2021 and July $31^{st}$, 2021 that purchase one of the top 3 recommended properties within 180 minutes of their search? 
+**Research Question**: What is the proportion of consumers during June $1^{st}$, 2021 and July $31^{st}$, 2021 that purchase one of the top 3 recommended properties within 180 minutes of a user search? 
 
 **Research Motivation**: 
 
@@ -111,10 +111,10 @@ confidence_interval <- quantile(sample_means$trans_proportion, c(0.025, 0.975))
   
 * A confidence level 95% means that 95% of confidence interval generated in a similar manner (i.e. resampling from the sample of 1,000 user data 3,000 times) will capture the true proportion of consumers during June $1^{st}$, 2021 and July $31^{st}$, 2021 who purchased a top 3 recommended property.
 
-* The width of the confidence interval (i.e. $0.015 - 0.003 = 0.012$) is very narrow. So, we expect the true true proportion to be very similar to the estimate made. 
+* The width of the confidence interval (i.e. $0.015 - 0.003 = 0.012$) is very narrow. So, we expect the true proportion to be very similar to the estimate made. 
 
 ## Research Question 2 - Introduction
-**Research Question**: Are discounted properties during the period of June $1^{st}$, 2021 and July $31^{st}$, 2021 more likely to result in more clicks within 180 minutes? 
+**Research Question**: Are discounted properties between June $1^{st}$, 2021 and July $31^{st}$, 2021 more likely to result in more clicks within 180 minutes of a user search? 
 
 **Hypothesis:** 
 
@@ -135,7 +135,7 @@ where $\mu_{no\ discount}$ and $\mu_{discount}$ are the mean number of clicks fo
 
 * To tidy the data (due to change in population), we ran a for loop to reshape the tibble to have rows which represent listings instead of user search results. The new tibble has variables num_clicks and is_drr. 
 
-* num_clicks represents the number of clicks received by the property within 180 minutes of the search. 
+* num_clicks represents the number of clicks received by the property within 180 minutes of a user search. 
   
 * is_drr represents whether the listed property is discounted. 
 
@@ -369,7 +369,7 @@ For the **research question 3**,
 
 * It is found that as the number of adults increases, the length of travel increases. 
 
-* Expedia can consider the linear regression model when purchases properties in bulk or advising hoteliers regarding the expected intervals of booking. For instance, if a property has many rooms, booking it for a longer interval will prevent cases where the property is not transacted as it does not suit consumer needs.
+* Expedia can consider the linear regression model when purchases properties in bulk or advising hoteliers regarding the expected intervals of booking. For instance, if a property has many rooms, it can fit more people. So, it should be booked for a longer period to reduce chances of the property not being transacted. 
 
 * However, the low $R^2$ value of `r summary(mod1_train)$r.squared` implies there are other variables that explain the variability in travel length. 
 
