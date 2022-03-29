@@ -36,7 +36,7 @@ expedia_data <- read_csv("ExpediaSearchData.csv")
   1. How effective is Expedia's recommendation algorithm? 
   2. What are some factors that affect purchasing decisions of consumers? 
 
-* The dataset for the research includes data of 1,000 user searches along with certain variables related to users or the top 3 recommended properties during the period of June $1^{st}$, 2021 and July $31^{st}$, 2021.
+* The investigation will be based on a dataset of 1,000 user searches along with certain variables related to users or the top 3 recommended properties during the period of June $1^{st}$, 2021 and July $31^{st}$, 2021.
 
 * Unless stated otherwise, the sample of this research consists of these 1,000 consumer searches while the population of this research consists of all users that made an Expedia search during the period of June $1^{st}$, 2021 and July $31^{st}$, 2021.
 
@@ -233,9 +233,9 @@ where $\beta_1, \ \beta_2, \ ..., \ \beta_n$ are slope parameters for the linear
 
 **Research Motivation**: 
 
-* Knowing how long a property should be rented or advising how hotels should schedule booking intervals to tailor consumer needs is important. 
+* Predicting how long a property is typically rented is important since Expedia purchases bookings in bulks. 
 
-* For instance, a property with more rooms can fit more travelers. If it is found that length of travel is positively correlated with the number of people on a trip, then the property should expect for longer booking intervals. 
+* For instance, if the length of travel is positively correlated with the number of adults on the trip, then listings with more rooms should expect longer booking intervals (as they fit more people). 
 
 ## Research Question 3 - Data Processing 
 
@@ -264,7 +264,8 @@ expedia_data_q3 %>% ggplot(aes(x=adult_count, y=travel_length)) +
   labs(x="Number of Adults",
        y="Average length of Travel (Days)",
        title="Number of Adults Versus \nAverage Length of Travel") + 
-  theme_minimal()
+  theme_minimal() + 
+  scale_x_continuous(breaks=c(0,1,2,3,4,5,6,7,8,9))
 ```
 
 
@@ -320,15 +321,15 @@ summary(mod4_train)$r.squared
 coefficients <- summary(mod1_train)$coefficients
 ```
 
-* After trying several linear regression models (e.g. simple, multiple regression with or without interaction), we have found a model that "best" explains the association between the number and type of travelers and length of the trip. 
+* After trying several linear regression models (e.g. simple, multiple regression with or without interaction), we find that a single linear regression "best" explains the association between number and type of travelers and length of the trip. 
 
 * By picking the "best" model based on prediction accuracy, low signs of overfitting and simplicity, we find it is sufficient to only consider how many adults are on a trip to predict the length of the trip. 
 
-* Based on the p-value of `r round(5.546797e-04, digits=6)` which is extremely small, there is very strong evidence against the null hypothesis that there is no relationship between the number of adults on a trip and the length of a trip. Due to the extremely small p-value, we reject the null hypothesis. 
+* The extremely small p-value of `r round(5.546797e-04, digits=6)` suggests there is very strong evidence against the null hypothesis that there is no relationship between the number of adults on a trip and the length of a trip. Thus, we reject the null hypothesis. 
 
 * The calculated slope of `r round(0.4257908, digits=4)` implies that for each additional adult, the length of trip increases by `r round(0.4257908, digits=4)` days on average. 
 
-* With this said, the $R^2$ value of `r round(summary(mod1_train)$r.squared,4)` for the linear regression model implies only `r round(summary(mod1_train)$r.squared,4) * 100`% of variability in the length of trip is accounted by the number of adults on the trip. 
+* However, the $R^2$ value of `r round(summary(mod1_train)$r.squared,4)` for the linear regression model implies only `r round(summary(mod1_train)$r.squared,4) * 100`% of variability in the length of trip is accounted by the number of adults on the trip. 
 
 ## Limitations 
 
@@ -338,32 +339,36 @@ coefficients <- summary(mod1_train)$coefficients
 
 * For the second research question, whether a property is transacted is a better metric of consumer interest compared to number of clicks a property receives. However, only 9 properties are transacted out of the 3,000 properties. Due to lack of data, we used the number of clicks as the metric. 
 
-* For the third research question, we intended to research how the number of adults, children and _infants_ affect the length of travel. However, only 9 data points had infants in their travel group. Due to lack of data, we removed the number of infants as a potential predictor variable. 
+* For the third research question, we intended to research how the number of adults, children and infants affect the length of travel. However, only 9 data points had infants in their travel group. Due to lack of data, we removed the number of infants as a potential predictor variable. 
 
 ## Overall Conclusion - Looking Ahead Part 1
 Here are some closing thoughts for each research question.
 
-For the **first research question**, 
+For the **research question 1**, 
 
 * The 95% confidence interval for the proportion of top 3 recommended listings transacted is (`r confidence_interval[1]`, `r confidence_interval[2]`). 
 
-* The bounds of the interval are low which implies the recommendation algorithm has room for improvement. We recommend Expedia to invest in research and development of recommendation algorithms can improve the profitability of the business. 
+* The bounds of the interval are low which implies the recommendation algorithm has room for improvement. 
+
+* We recommend Expedia to invest in research and development of recommendation algorithms can improve the profitability of the business. 
 
 ## Overall Conclusion - Looking Ahead Part 2
-For the **second research question**, 
+For the **research question 2**, 
 
 * It was found that there is weak evidence against the null hypothesis that the mean number of clicks for discounted and non-discounted properties is the same. 
 
-* We recommend Expedia to perform A/B testing with variations of the website website with more or less discounted properties to see how users consumption behaviour changes$^{[2]}$. 
+* We recommend Expedia to perform A/B testing with 1 variation of website where the difference lies in the number of discounted properties$^{[2]}$.
 
-* This may lead to developing new marketing strategies in terms of increasing or decreasing the number of discounted properties on the webpage to optimize profits.  
+* This allows Expedia to find out how user consumption behaviours change based on change in the number of discounted properties.  
+
+* This may lead to developing new marketing strategies in terms of discounting more or less properties to maximize profit. 
 
 ## Overall Conclusion - Looking Ahead Part 3
-For the **third research question**, 
+For the **research question 3**, 
 
 * It is found that as the number of adults increases, the length of travel increases. 
 
-* Expedia can consider the linear regression model when purchases properties in bulk or advising hoteliers regarding the expected interval of booking. 
+* Expedia can consider the linear regression model when purchases properties in bulk or advising hoteliers regarding the expected intervals of booking. For instance, if a property has many rooms, booking it for a longer interval will prevent cases where the property cannot be transacted.
 
 * However, the low $R^2$ value of `r summary(mod1_train)$r.squared` implies there are other variables that explain the variability in travel length. 
 
