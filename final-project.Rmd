@@ -43,19 +43,19 @@ expedia_data <- read_csv("ExpediaSearchData.csv")
 ## Data Summary
 Below is a table of variables used in all 3 research problems. Note that {n} is a placeholder for integers 1, 2, or 3. 
  
-| Variable      | Description                                                           |
-|---------------|-----------------------------------------------------------------------|
-| is_trans{n}   | describes whether the consumer transacted the n-th displayed property |
-| is_drr{n}     | describes whether the n-th displayed property is discounted           |
-| num_clicks{n} | number of clicks for the n-th displayed property                      |
-| checkin_date  | stay start date                                                       |
-| checkout_date | stay end date                                                         |
-| adult_count   | number of adults on the trip                                          |
-| child_count   | number of children on the trip                                        |
+| Variable      	| Description                                                                                  	|
+|-----------------|-----------------------------------------------------------------------------------------------|
+| is_trans{n}   	|  whether the consumer transacted the n-th displayed property within 180 minutes of the search |
+| is_drr{n}     	|  whether the n-th displayed property is discounted                                            |
+| num_clicks{n} 	|  number of clicks for the n-th displayed property within 180 minutes of the search            |
+| checkin_date  	|  stay start date                                                                              |
+| checkout_date 	|  stay end date                                                                                |
+| adult_count   	|  number of adults on the trip                                                                 |
+| child_count   	|  number of children on the trip                                                               |
 
 
 ## Research Question 1 - Introduction
-**Research Question**: What is the proportion of consumers during June $1^{st}$, 2021 and July $31^{st}$, 2021 that purchase one of the top 3 recommended properties? 
+**Research Question**: What is the proportion of consumers during June $1^{st}$, 2021 and July $31^{st}$, 2021 that purchase one of the top 3 recommended properties within 180 minutes of their search? 
 
 **Research Motivation**: 
 
@@ -63,12 +63,12 @@ Below is a table of variables used in all 3 research problems. Note that {n} is 
 
 * For instance, a higher proportion may imply the algorithm is effective at recognizing user needs while a lower proportion may imply the algorithm is less effective at recognizing user needs. 
 
-## Research Question 1 - Data Processing 
+## Research Question 1 - Data Wrangling  
 * We applied the `select()` function to obtain the required variables, namely is_trans1, is_trans2 and is_trans3. 
 
-* We applied the `mutate()` function to change the values of is_trans1, is_trans2 and is_trans2 based on whether the variable is non-missing and indicated by 0 (no transaction) or 1 (transaction). 
+* Using is_trans1, is_trans2 and is_trans3 columns, we applied the `mutate()` function to create a new logical variable named trans_made which indicates whether any transactions were made by the user.
 
-* Lastly, using the redefined is_trans1, is_trans2 and is_trans3 columns, we applied the `mutate()` function to create a new logical variable named trans_made which checks if any of is_trans1, is_trans2 or is_trans3 are set to 1.
+* trans_made is set to TRUE if a transaction is made within 180 minutes of a user search and FALSE if a transaction is not made within 180 minutes of a user search. 
 
 ## Research Question 1 - Data Visualization
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.height=2.5, fig.width=3.5, fig.align='center'}
@@ -114,7 +114,7 @@ confidence_interval <- quantile(sample_means$trans_proportion, c(0.025, 0.975))
 * The width of the confidence interval (i.e. $0.015 - 0.003 = 0.012$) is very narrow. So, we expect the true true proportion to be very similar to the estimate made. 
 
 ## Research Question 2 - Introduction
-**Research Question**: Are discounted properties during the period of June $1^{st}$, 2021 and July $31^{st}$, 2021 more likely to result in more clicks? 
+**Research Question**: Are discounted properties during the period of June $1^{st}$, 2021 and July $31^{st}$, 2021 more likely to result in more clicks within 180 minutes? 
 
 **Hypothesis:** 
 
@@ -130,14 +130,14 @@ where $\mu_{no\ discount}$ and $\mu_{discount}$ are the mean number of clicks fo
 
 * Hypothetically, if users are more interested in discounted listings, it may be in Expedia's interest to discount more listings to attract more consumers. 
 
-## Research Question 2 - Data Processing
+## Research Question 2 - Data Wrangling  
 * We applied the `select()` function to obtain the required variables, namely num_clicks1, num_clicks2, num_clicks3, is_drr1, is_drr2 and is_drr3. 
 
 * To tidy the data (due to change in population), we ran a for loop to reshape the tibble to have rows which represent listings instead of user search results. The new tibble has variables num_clicks and is_drr. 
 
-* We applied the `filter()` function to remove listings where num_clicks or is_drr are missing. 
-
-* We applied the `mutate()` function to make is_drr a logical variable representing whether a property is discounted. 
+* num_clicks represents the number of clicks received by the property within 180 minutes of the search. 
+  
+* is_drr represents whether the listed property is discounted. 
 
 * We applied the `group_by()` and `summarise` functions to obtain the mean number of clicks for discounted and non-discounted listings. 
 
@@ -172,9 +172,9 @@ expedia_data_q2_summary <- expedia_data_q2 %>%
 expedia_data_q2_summary %>% 
   ggplot(aes(x=is_drr, y=mean_num_clicks)) + 
   geom_bar(stat="identity") + 
-  labs(x="Property Discounted",
-       y="Average Number of Clicks",
-       title="Average Number of Clicks for Discounted \n and Non-discounted properties")
+  labs(x="Property discounted",
+       y="Average number of clicks",
+       title="Average number of clicks for discounted \n and non-discounted top 3 properties")
 ```
 
 ## Research Question 2 - Statistical Analysis
@@ -237,13 +237,13 @@ where $\beta_1, \ \beta_2, \ ...\ , \ \beta_n$ are slope coefficients for the li
 
 * For instance, larger properties which can fit more people may be booking for longer interval of time if the correlation is found to be positive. 
 
-## Research Question 3 - Data Processing 
+## Research Question 3 - Data Wrangling  
 
 * We applied the `select()` function to obtain the required variables, namely adult_count, child_count, checkin_date, checkout_date. 
 
-* We applied the `filter()` function to remove rows where checkin_date or checkout_date are missing. 
+* We applied the `mutate()` function to create a new variable called travel_length. 
 
-* We applied the `mutate()` function to create a new variable called travel_length which represents the time difference between checkout_date and checkin_date in days. 
+    + travel_length represents the time difference between checkout_date and checkin_date in days. 
 
 * We applied the `select()` function to select the required variables, namely adult_count, child_count and travel_length. 
 
@@ -261,9 +261,9 @@ expedia_data_q3 <- expedia_data %>%
 expedia_data_q3 %>% ggplot(aes(x=adult_count, y=travel_length)) + 
   geom_point() + 
   geom_smooth(se=FALSE, method="lm") + 
-  labs(x="Number of Adults",
-       y="Average length of Travel (Days)",
-       title="Number of Adults Versus \nAverage Length of Travel") + 
+  labs(x="Number of adults",
+       y="Average length of travel (days)",
+       title="Number of adults versus \naverage length of travel") + 
   theme_minimal() + 
   scale_x_continuous(breaks=c(0,1,2,3,4,5,6,7,8,9,10))
 ```
@@ -333,13 +333,15 @@ coefficients <- summary(mod1_train)$coefficients
 
 ## Limitations 
 
-* The data filled in by users is 100% accurate. Inaccurate data being entered to the search engine will skew statistical results. 
+* We assume that data filled in by users is accurate. Inaccurate data entries (e.g. typos) may skew the statistical results. 
 
-* The sample is representative of the population. If not, statistical models (especially bootstrapping) will not yield accurate results. 
+* We assume that the sample is representative of the population. Otherwise, statistical models (especially bootstrapping) will not yield accurate results. 
 
-* For the second research question, whether a property is transacted is a better metric of consumer interest compared to number of clicks a property receives. However, only 9 properties are transacted out of the 3,000 properties. Due to lack of data, we used the number of clicks as the metric. 
+* For research questions 1 and 2, is_trans{n} and num_clicks{n} only measure user events like transaction or clicks for 180 minutes within the search. As a result, this limitation carries over to the results discussed. 
 
-* For the third research question, we intended to research how the number of adults, children and infants affect the length of travel. However, only 9 data points had infants in their travel group. Due to lack of data, we removed the number of infants as a potential predictor variable. 
+* For research question 2, transactions are a better metric of consumer interest compared to clicks received by a listing. However, only 9 properties are transacted out of the 3,000 properties. So, we used the number of clicks as the metric. 
+
+* For research question 3, we intended to research how the number of adults, children and infants affect the length of travel. However, only 9 data points had infants in their travel group. So, we removed the number of infants as a potential predictor. 
 
 ## Overall Conclusion - Looking Ahead Part 1
 Here are some closing thoughts for each research question.
@@ -347,7 +349,6 @@ Here are some closing thoughts for each research question.
 For the **research question 1**, 
 
 * The 95% confidence interval for the proportion of top 3 recommended listings transacted is (`r confidence_interval[1]`, `r confidence_interval[2]`). 
-
 * The bounds of the interval are low which implies the recommendation algorithm has room for improvement. 
 
 * We recommend Expedia to invest in research and development of recommendation algorithms can improve the profitability of the business. 
