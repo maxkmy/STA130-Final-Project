@@ -32,11 +32,11 @@ expedia_data <- read_csv("ExpediaSearchData.csv")
 
 * Thus, an effective recommendation algorithm that recognizes consumer needs is crucial to improve user experience and optimize the bottom line of the business.
 
-* This leads to the investigation of the following: 
+* We formulate 3 research questions that help answer the following questions:
   1. How effective is Expedia's recommendation algorithm? 
   2. What are some factors that affect purchasing decisions of consumers? 
 
-* The investigation will be based on a dataset of 1,000 user searches along with certain variables related to users or the top 3 recommended properties during the period of June $1^{st}$, 2021 and July $31^{st}$, 2021.
+* The investigation uses a dataset of 1,000 user searches along with certain variables related to users or the top 3 recommended properties during the period of June $1^{st}$, 2021 and July $31^{st}$, 2021.
 
 * Unless stated otherwise, the sample of this research consists of these 1,000 consumer searches while the population of this research consists of all users that made an Expedia search during the period of June $1^{st}$, 2021 and July $31^{st}$, 2021.
 
@@ -229,13 +229,13 @@ $H_0: \beta_1 = 0 \text { OR } \beta_2 = 0 \text{ OR }... \  \beta_n = 0$
 
 $H_1: \beta_1 \neq 0 \text{ AND } \beta_2 \neq 0 \text{ AND }... \  \beta_n \neq 0$ 
 
-where $\beta_1, \ \beta_2, \ ..., \ \beta_n$ are slope parameters for the linear regression where the predictor variables are the number of children and adults and the response variable is the time difference between a check-out date and a check-in date (i.e. length of travel). 
+where $\beta_1, \ \beta_2, \ ...\ , \ \beta_n$ are slope coefficients for the linear regression model where the predictors are the number of children and adults and the response is the length of travel. 
 
 **Research Motivation**: 
 
-* Predicting how long a property is typically rented is important since Expedia purchases bookings in bulks. 
+* If a correlation exists between the type and number of travelers and length of travel, Expedia may want to consider this correlation when booking properties in bulk.
 
-* For instance, if the length of travel is positively correlated with the number of adults on the trip, then listings with more rooms should expect longer booking intervals (as they fit more people). 
+* For instance, larger properties which can fit more people may be booking for longer interval of time if the correlation is found to be positive. 
 
 ## Research Question 3 - Data Processing 
 
@@ -265,7 +265,7 @@ expedia_data_q3 %>% ggplot(aes(x=adult_count, y=travel_length)) +
        y="Average length of Travel (Days)",
        title="Number of Adults Versus \nAverage Length of Travel") + 
   theme_minimal() + 
-  scale_x_continuous(breaks=c(0,1,2,3,4,5,6,7,8,9))
+  scale_x_continuous(breaks=c(0,1,2,3,4,5,6,7,8,9,10))
 ```
 
 
@@ -368,7 +368,7 @@ For the **research question 3**,
 
 * It is found that as the number of adults increases, the length of travel increases. 
 
-* Expedia can consider the linear regression model when purchases properties in bulk or advising hoteliers regarding the expected intervals of booking. For instance, if a property has many rooms, booking it for a longer interval will prevent cases where the property cannot be transacted.
+* Expedia can consider the linear regression model when purchases properties in bulk or advising hoteliers regarding the expected intervals of booking. For instance, if a property has many rooms, booking it for a longer interval will prevent cases where the property is not transacted as it does not suit consumer needs.
 
 * However, the low $R^2$ value of `r summary(mod1_train)$r.squared` implies there are other variables that explain the variability in travel length. 
 
