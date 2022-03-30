@@ -28,34 +28,34 @@ expedia_data <- read_csv("ExpediaSearchData.csv")
 
 ## General Motivations and Dataset Description
 
-* Expedia generates revenue by reselling bookings (purchased in bulks at discounted pricing) or charging commissions from hoteliers$^{[1]}$.
+* Expedia generates revenue by reselling bookings (purchased in bulks at discounted pricing) or charging commissions from hoteliers.$^{[1]}$
 
-* Thus, an effective recommendation algorithm that recognizes consumer needs is crucial to improve user experience and optimize the bottom line of the business.
+* Thus, an effective recommendation algorithm that recognizes consumer needs is crucial to improve user experience and optimize the profitability of the business.
 
-* We formulate 3 research questions that help answer the following questions:
+* We formulate 3 research questions that answer these "broad" questions:
   1. How effective is Expedia's recommendation algorithm? 
   2. What are some factors that affect purchasing decisions of consumers? 
 
-* The investigation uses a dataset of 1,000 user searches along with certain variables related to users or the top 3 recommended properties during the period of June $1^{st}$, 2021 and July $31^{st}$, 2021.
+* The investigation uses a dataset of 1,000 Expedia user searches along with certain variables related to users or the top 3 recommended properties between June $1^{st}$, 2021 and July $31^{st}$, 2021.
 
-* Unless stated otherwise, the sample of this research consists of these 1,000 consumer searches while the population of this research consists of all users that made an Expedia search during the period of June $1^{st}$, 2021 and July $31^{st}$, 2021.
+* Unless restated, you may assume the sample of the 3 research questions consists of the users that made these 1,000 Expedia searches while the population consists of all Expedia users who made a search between June $1^{st}$, 2021 and July $31^{st}$, 2021.
 
 ## Data Summary
-Below is a table of variables used in all 3 research problems. Note that {n} is a placeholder for integers 1, 2, or 3. 
+Below is a table of variables used in the 3 research problems. Note that {n} is a placeholder for integers 1, 2, or 3. 
  
-| Variable      	| Description                                                                                  	   |
-|-----------------|--------------------------------------------------------------------------------------------------|
-| is_trans{n}   	|  whether the consumer transacted the n-th displayed property within 180 minutes of a user search |
-| is_drr{n}     	|  whether the n-th displayed property is discounted                                               |
-| num_clicks{n} 	|  number of clicks for the n-th displayed property within 180 minutes of a user search            |
-| checkin_date  	|  stay start date                                                                                 |
-| checkout_date 	|  stay end date                                                                                   |
-| adult_count   	|  number of adults on the trip                                                                    |
-| child_count   	|  number of children on the trip                                                                  |
+| Variable      	| Description                                                                                  	      |
+|-----------------|-----------------------------------------------------------------------------------------------------|
+| is_trans{n}   	|  whether the consumer transacted the n$^{th}$ displayed property within 180 minutes of a user search|
+| is_drr{n}     	|  whether the n$^{th}$ displayed property is discounted                                              |
+| num_clicks{n} 	|  number of clicks for the n$^{th}$ displayed property within 180 minutes of a user search           |
+| checkin_date  	|  stay start date                                                                                    |
+| checkout_date 	|  stay end date                                                                                      |
+| adult_count   	|  number of adults on the trip                                                                       |
+| child_count   	|  number of children on the trip                                                                     |
 
 
 ## Research Question 1 - Introduction
-**Research Question**: What is the proportion of consumers during June $1^{st}$, 2021 and July $31^{st}$, 2021 that purchase one of the top 3 recommended properties within 180 minutes of a user search? 
+**Research Question**: What is the proportion of consumers between June $1^{st}$, 2021 and July $31^{st}$, 2021 that purchase one of the top 3 recommended properties within 180 minutes of a search? 
 
 **Research Motivation**: 
 
@@ -66,12 +66,12 @@ Below is a table of variables used in all 3 research problems. Note that {n} is 
 ## Research Question 1 - Data Wrangling  
 * We applied the `select()` function to obtain the required variables, namely is_trans1, is_trans2 and is_trans3. 
 
-* Using is_trans1, is_trans2 and is_trans3 columns, we applied the `mutate()` function to create a new logical variable named trans_made which indicates whether any transactions were made by the user.
+* Using is_trans1, is_trans2 and is_trans3 columns, we applied the `mutate()` function to create a new variable named trans_made which indicates whether any transactions were made by a user within 180 minutes of his or her search.
 
-* trans_made is set to TRUE if a transaction is made within 180 minutes of a user search and FALSE if a transaction is not made within 180 minutes of a user search. 
+* trans_made is set to TRUE if a transaction is made within 180 minutes of a user search. Otherwise, trans_made is set to FALSE.
 
 ## Research Question 1 - Data Visualization
-```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.height=2.5, fig.width=3.5, fig.align='center'}
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.height=2.5, fig.width=3.7, fig.align='center'}
 expedia_data_q1 <- expedia_data %>% 
   select(is_trans1, is_trans2, is_trans3) %>% 
   mutate(is_trans1 = ifelse(!is.na(is_trans1) & is_trans1 == 1, 1, 0),
@@ -85,10 +85,10 @@ expedia_data_q1 %>%
   geom_bar(color="black", fill="gray") + 
   labs(x="Transaction made by users for any \n of top 3 recommended properties",
        y="Count", 
-       title="Number of users who transacted \nor have not transacted top 3 \nrecommended properties out of \n1,000 total users")
+       title="Number of users who transacted \nor have not transacted a top 3 \nrecommended properties in 180 \nminutes of a search")
 ```
 
-This figure shows that 9 out of 1,000 consumers in the sample purchase a top 3 search result recommended by Expedia's searching algorithm. 
+This figure shows that 9 out of 1,000 consumers in the sample purchase a top 3 listing recommended by Expedia within 180 minutes of their search.
 
 ## Research Question 1 - Statistical Analysis
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.height=3, fig.width=4, fig.align='left', results="hide"}
@@ -107,42 +107,41 @@ confidence_interval <- quantile(sample_means$trans_proportion, c(0.025, 0.975))
 
 * We assume that the sample is representative of the population in order to perform bootstrapping. 
 
-* By resampling from the sample of 1,000 users for 3,000 repetitions and choosing a 95% confidence level, we find the confidence interval for the proportion of users during June $1^{st}$, 2021 and July $31^{st}$, 2021 who purchased a top 3 recommended property is (`r confidence_interval[1]`, `r confidence_interval[2]`).
+* By resampling from the sample of 1,000 users for 3,000 repetitions and choosing a 95% confidence level, we find the confidence interval for the proportion of users between June $1^{st}$, 2021 and July $31^{st}$, 2021 who purchased a top 3 recommended property within 180 minutes is (`r confidence_interval[1]`, `r confidence_interval[2]`).
   
-* A confidence level 95% means that 95% of confidence interval generated in a similar manner (i.e. resampling from the sample of 1,000 user data 3,000 times) will capture the true proportion of consumers during June $1^{st}$, 2021 and July $31^{st}$, 2021 who purchased a top 3 recommended property.
+* A confidence level 95% means that 95% of confidence intervals generated in a similar manner (i.e. resampling from the sample of 1,000 user data 3,000 times) will capture the true proportion of consumers between June $1^{st}$, 2021 and July $31^{st}$, 2021 who purchased a top 3 recommended property within 180 minutes.
 
 * The width of the confidence interval (i.e. $0.015 - 0.003 = 0.012$) is very narrow. So, we expect the true proportion to be very similar to the estimate made. 
 
 ## Research Question 2 - Introduction
-**Research Question**: Are discounted properties between June $1^{st}$, 2021 and July $31^{st}$, 2021 more likely to result in more clicks within 180 minutes of a user search? 
+**Research Question**: Do the mean number of clicks received within 180 minutes of a user search differ for top 3 recommended discounted and non-discounted listings between June $1^{st}$, 2021 and July $31^{st}$, 2021? 
 
 **Hypothesis:** 
+The population contains top 3 recommended properties between June $1^{st}$, 2021 and July $31^{st}$, 2021. 
 
 $H_0: \mu_{no\ discount} - \mu_{discount} = 0$
 
 $H_1: \mu_{no\ discount} - \mu_{discount} \neq 0$ 
 
-where $\mu_{no\ discount}$ and $\mu_{discount}$ are the mean number of clicks for non-discounted and discounted properties respectively during June $1^{st}$, 2021 and July $31^{st}$, 2021. 
+where $\mu_{no\ discount}$ and $\mu_{discount}$ are the mean number of clicks for non-discounted and discounted top 3 listings respectively between June $1^{st}$, 2021 and July $31^{st}$, 2021. 
 
 **Research Motivation**: 
 
-* The population of interest consists of all properties listed during June $1^{st}$, 2021 and July $31^{st}$, 2021. 
-
-* Hypothetically, if users are more interested in discounted listings, it may be in Expedia's interest to discount more listings to attract more consumers. 
+* Hypothetically, if users are more interested in discounted listings, Expedia may increase the number of discounted listings to attract more consumers. 
 
 ## Research Question 2 - Data Wrangling  
 * We applied the `select()` function to obtain the required variables, namely num_clicks1, num_clicks2, num_clicks3, is_drr1, is_drr2 and is_drr3. 
 
-* To tidy the data (due to change in population), we ran a for loop to reshape the tibble to have rows which represent listings instead of user search results. The new tibble has variables num_clicks and is_drr. 
+* To tidy the data (due to change in population), we ran a for loop to reshape the tibble to have rows which represent listings instead of user search results. The new tibble has columns num_clicks and is_drr. 
 
 * num_clicks represents the number of clicks received by the property within 180 minutes of a user search. 
   
 * is_drr represents whether the listed property is discounted. 
 
-* We applied the `group_by()` and `summarise` functions to obtain the mean number of clicks for discounted and non-discounted listings. 
+* We applied the `group_by()` and `summarise()` functions to obtain the mean number of clicks received within 180 minutes of a search for discounted and non-discounted top 3 listings. 
 
 ## Research Question 2 - Visualization
-```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.height=3, fig.width=4, fig.align='center'}
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.height=3, fig.width=4.2, fig.align='center'}
 untidy_expedia_data_q2 <- expedia_data %>% 
   select(num_clicks1, is_drr1, num_clicks2, is_drr2, num_clicks3, is_drr3)
 
@@ -173,8 +172,8 @@ expedia_data_q2_summary %>%
   ggplot(aes(x=is_drr, y=mean_num_clicks)) + 
   geom_bar(stat="identity") + 
   labs(x="Property discounted",
-       y="Average number of clicks",
-       title="Average number of clicks for discounted \n and non-discounted top 3 properties")
+       y="Mean number of clicks\nwithin 180 minutes \nof a user search",
+       title="Average number of clicks within 180 \nminutes of a user search for discounted \nand non-discounted top 3 properties")
 ```
 
 ## Research Question 2 - Statistical Analysis
@@ -209,15 +208,13 @@ p_value <- as.numeric(more_extreme_simulated_values) / n
 p_value
 ```
 
-* The calculated test statistic from the dataset for the difference between the mean number of clicks for discounted and non-discounted properties is `r round(test_stat, digits=4)`. 
+* The calculated test statistic from the dataset for the difference between the mean number of clicks received within 180 minutes of a search for non-discounted and discounted top properties is `r round(test_stat, digits=4)`. 
 
-* This means that within the samples, discounted properties get `r -round(test_stat, digits=4)` less clicks than non-discounted properties on average. 
+* This means that within the sample, discounted top 3 properties get `r -round(test_stat, digits=4)` less clicks than non-discounted properties on average within 180 minutes of a user search. 
 
-* After running 5,000 simulations under the assumption that the null hypothesis is true, the p-value is found to be `r round(p_value, digits=4)`. 
+* After running 5,000 simulations under the assumption that the null hypothesis is true (by shuffling the label [id_drr] indicating whether a property is discounted), the p-value is found to be `r round(p_value, digits=4)`. 
 
-* Since the p-value is between 0.01 and 0.05, there is moderate evidence against the null hypothesis which states that the mean number of clicks for discounted and non-discounted properties is the same. 
-
-* The implication of this result will be further discussed in the conclusion section.
+* Since the p-value is between 0.01 and 0.05, there is moderate evidence against the null hypothesis which states that the mean number of clicks for discounted and non-discounted properties received within 180 minutes of a user search is the same. 
 
 ## Research Question 3 - Introduction
 **Research Question**: Do the number of adults and children on a trip affect the length of
@@ -225,17 +222,17 @@ travel?
 
 **Hypothesis**: 
 
-$H_0: \beta_1 = 0 \text { OR } \beta_2 = 0 \text{ OR }... \  \beta_n = 0$ 
+$H_0: \beta_{i} = 0$
 
-$H_1: \beta_1 \neq 0 \text{ AND } \beta_2 \neq 0 \text{ AND }... \  \beta_n \neq 0$ 
+$H_1: \beta_{i} \neq 0$
 
-where $\beta_1, \ \beta_2, \ ...\ , \ \beta_n$ are slope coefficients for the linear regression model where the predictors are the number of children and adults and the response is the length of travel. 
+where $\beta_{i}$ is a slope coefficient for the linear regression model where the predictors are the number of children and adults and the response is the length of travel. 
 
 **Research Motivation**: 
 
 * If a correlation exists between the type and number of travelers and length of travel, Expedia may want to consider this correlation when booking properties in bulk.
 
-* For instance, larger properties which can fit more people may be booking for longer interval of time if the correlation is found to be positive. 
+* For instance, larger properties which can fit more people may be booked for longer interval of time if the correlation is found to be positive. 
 
 ## Research Question 3 - Data Wrangling  
 
@@ -243,14 +240,12 @@ where $\beta_1, \ \beta_2, \ ...\ , \ \beta_n$ are slope coefficients for the li
 
 * We applied the `mutate()` function to create a new variable called travel_length. 
 
-    + travel_length represents the time difference between checkout_date and checkin_date in days. 
+* travel_length represents the time difference between checkout_date and checkin_date in days. 
 
-* We applied the `select()` function to select the required variables, namely adult_count, child_count and travel_length. 
+* To split dataset into training and testing when performing linear regression, we applied the `rowid_to_column()` function to add a unique identifier to each row in the tibble. 
 
-* To perform linear regression, we applied the `rowid_to_column()` function to add a unique identifier to each row in the tibble. 
-
-## Research Question 3 - Visualization
-```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.height=3, fig.width=4, fig.align='center'}
+## Research Question 3 - Statistical Analysis
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.height=3, fig.width=4, fig.align='left', results="hide"}
 expedia_data_q3 <- expedia_data %>%  
   select(adult_count, child_count, checkin_date, checkout_date) %>%  
   filter(!is.na(checkin_date) & !is.na(checkout_date)) %>%  
@@ -258,19 +253,6 @@ expedia_data_q3 <- expedia_data %>%
   select(adult_count, child_count, travel_length) %>%  
   rowid_to_column()
 
-expedia_data_q3 %>% ggplot(aes(x=adult_count, y=travel_length)) + 
-  geom_point() + 
-  geom_smooth(se=FALSE, method="lm") + 
-  labs(x="Number of adults",
-       y="Average length of travel (days)",
-       title="Number of adults versus \naverage length of travel") + 
-  theme_minimal() + 
-  scale_x_continuous(breaks=c(0,1,2,3,4,5,6,7,8,9,10))
-```
-
-
-## Research Question 3 - Statistical Analysis
-```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.height=3, fig.width=4, fig.align='left', results="hide"}
 set.seed(15) 
 n <- nrow(expedia_data_q3)
 training_indices <- sample(1:n, size=round(0.8 * n))
@@ -313,23 +295,40 @@ model_comparison_table <- tibble(Model = c("1", "2", "3", "4"),
                                                     mod3_train_RMSE, mod4_train_RMSE),
                                  ratio_of_RMSEs = RMSE_testdata / RMSE_traindata)
 
-model_comparison_table
-summary(mod1_train)$r.squared
-summary(mod2_train)$r.squared
-summary(mod3_train)$r.squared
-summary(mod4_train)$r.squared
-coefficients <- summary(mod1_train)$coefficients
+# model_comparison_table
+# summary(mod2_train)$r.squared
+# summary(mod3_train)$r.squared
+# summary(mod4_train)$r.squared
+# summary(mod2_train)$coefficients
+# summary(mod3_train)$coefficients
+# summary(mod4_train)$coefficients
+
+slope <- summary(mod1_train)$coefficients[2][1]
+p_value <- summary(mod1_train)$coefficients[2][4]
+r_squared <- summary(mod1_train)$r.squared
 ```
 
-* After trying several linear regression models (e.g. simple, multiple regression with or without interaction), we find that a single linear regression "best" explains the association between number and type of travelers and length of the trip. 
+* We created several linear regression models which differ by number of predictors (e.g. 1 predictor versus 2 predictors) and whether predictor variables interact.
 
-* By picking the "best" model based on prediction accuracy, low signs of overfitting and simplicity, we find it is sufficient to only consider how many adults are on a trip to predict the length of the trip. 
+* By picking the "best" model based on prediction accuracy, low signs of overfitting and simplicity, we find that the "best" model is a simple linear regression model (a model with 1 predictor) that uses the number of adults to predict the length of a trip.
 
-* The extremely small p-value of `r round(5.546797e-04, digits=6)` suggests there is very strong evidence against the null hypothesis that there is no relationship between the number of adults on a trip and the length of a trip. Thus, we reject the null hypothesis. 
+* The extremely small p-value of `r round(p_value, digits=6)` suggests there is very strong evidence against the null hypothesis that there is no relationship between the number of adults on a trip and the length of a trip. Thus, we reject the null hypothesis. 
 
-* The calculated slope of `r round(0.4257908, digits=4)` implies that for each additional adult, the length of trip increases by `r round(0.4257908, digits=4)` days on average. 
+* The calculated slope of `r round(slope, digits=4)` implies that for each additional adult, the length of trip increases by `r round(slope, digits=4)` days on average. 
 
-* However, the $R^2$ value of `r round(summary(mod1_train)$r.squared,4)` for the linear regression model implies only `r round(summary(mod1_train)$r.squared,4) * 100`% of variability in the length of trip is accounted by the number of adults on the trip. 
+* However, the $R^2$ value of `r round(r_squared, 4)` for the linear regression model implies only `r round(r_squared, 4) * 100`% of variability in the length of trip is accounted by the number of adults on the trip.
+
+## Research Question 3 - Visualization
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.height=3, fig.width=4, fig.align='center'}
+expedia_data_q3 %>% ggplot(aes(x=adult_count, y=travel_length)) + 
+  geom_point() + 
+  geom_smooth(se=FALSE, method="lm") + 
+  labs(x="Number of adults",
+       y="Length of travel (days)",
+       title="How number of adults affects length of \ntravel") + 
+  theme_minimal() + 
+  scale_x_continuous(breaks=c(0,1,2,3,4,5,6,7,8,9,10))
+```
 
 ## Limitations 
 
@@ -337,7 +336,7 @@ coefficients <- summary(mod1_train)$coefficients
 
 * We assume that the sample is representative of the population. Otherwise, statistical models (especially bootstrapping) will not yield accurate results. 
 
-* For research questions 1 and 2, is_trans{n} and num_clicks{n} only measure user events like transaction or clicks for 180 minutes within the search. As a result, this limitation carries over to the results discussed. 
+* For research questions 1 and 2, is_trans{n} and num_clicks{n} only measure user events like transaction or clicks for 180 minutes after a search. This time interval limitation carries over to the statistical analysis. 
 
 * For research question 2, transactions are a better metric of consumer interest compared to clicks received by a listing. However, only 9 properties are transacted out of the 3,000 properties. So, we used the number of clicks as the metric. 
 
@@ -349,31 +348,32 @@ Here are some closing thoughts for each research question.
 For the **research question 1**, 
 
 * The 95% confidence interval for the proportion of top 3 recommended listings transacted is (`r confidence_interval[1]`, `r confidence_interval[2]`). 
-* The bounds of the interval are low which implies the recommendation algorithm has room for improvement. 
 
-* We recommend Expedia to invest in research and development of recommendation algorithms can improve the profitability of the business. 
+* The bounds of the interval are low which implies the recommendation algorithm has room for improvement in terms of increasing the proportion of users who make a transaction (within 180 minutes).
+
+* We recommend Expedia to invest in research and development of recommendation algorithms as such algorithms have potential of directly improving the profitability of Expedia. 
 
 ## Overall Conclusion - Looking Ahead Part 2
 For the **research question 2**, 
 
 * It was found that there is weak evidence against the null hypothesis that the mean number of clicks for discounted and non-discounted properties is the same. 
 
-* We recommend Expedia to perform A/B testing with 1 variation of website where the difference lies in the number of discounted properties$^{[2]}$.
+* We recommend Expedia to perform A/B testing with 2 variations of the website which differ by the number of discounted listed properties.$^{[2]}$
 
 * This allows Expedia to find out how user consumption behaviours change based on change in the number of discounted properties.  
 
-* This may lead to developing new marketing strategies in terms of discounting more or less properties to maximize profit. 
+* This may lead to the development new marketing strategies in terms of discounting more or less properties to maximize profit. 
 
 ## Overall Conclusion - Looking Ahead Part 3
 For the **research question 3**, 
 
 * It is found that as the number of adults increases, the length of travel increases. 
 
-* Expedia can consider the linear regression model when purchases properties in bulk or advising hoteliers regarding the expected intervals of booking. For instance, if a property has many rooms, it can fit more people. So, it should be booked for a longer period to reduce chances of the property not being transacted. 
+* Expedia can consider the linear regression model when purchasing properties in bulk or advising hoteliers regarding the expected intervals of booking. For instance, when booking properties with many rooms to resell, Expedia should book these properties for longer period to reduce chances of them not being transacted. 
 
-* However, the low $R^2$ value of `r summary(mod1_train)$r.squared` implies there are other variables that explain the variability in travel length. 
+* However, the low $R^2$ value of `r round(r_squared, 4)` implies there are other variables that explain the variability in travel length. 
 
-* To get a more "complete" model, Expedia may choose to continue to explore how other variables (including variables that do not appear in the current dataset) affect length of travel. 
+* To get a more "complete" model, Expedia may choose to continue to explore how other variables (including those that do not appear in the current dataset) affect length of travel. 
 
 ## Citations 
 
